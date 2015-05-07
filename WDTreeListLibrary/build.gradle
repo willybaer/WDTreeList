@@ -1,0 +1,29 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+// Library version
+version = "0.0.1"
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 22
+        versionCode 1
+        versionName version
+    }
+    buildTypes {
+    }
+}
+
+def siteUrl = 'https://github.com/izacus/FuzzyDateFormatter'      // Homepage URL of the library
+def gitUrl = 'https://github.com/izacus/FuzzyDateFormatter.git'   // Git repository URL
+group = "<maven group id>"
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.1.1'
+}

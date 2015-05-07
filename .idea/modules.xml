@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/WDTreeList.iml" filepath="$PROJECT_DIR$/WDTreeList.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/WDTreeListDemo.iml" filepath="$PROJECT_DIR$/app/WDTreeListDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/WDTreeListLibrary/WDTreeListLibrary.iml" filepath="$PROJECT_DIR$/WDTreeListLibrary/WDTreeListLibrary.iml" />
+    </modules>
+  </component>
+</project>
