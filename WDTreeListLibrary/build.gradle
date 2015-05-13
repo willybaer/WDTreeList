@@ -2,8 +2,13 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
+//https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
 // Library version
-version = "0.0.1"
+version = "0.0.2"
+group = "com.github.willybaer.wdtreelist"
+
+def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
+def gitUrl = 'https://github.com/willybaer/WDTreeList.git'   // Git repository URL
 
 android {
     compileSdkVersion 22
@@ -19,11 +24,97 @@ android {
     }
 }
 
-def siteUrl = 'https://github.com/izacus/FuzzyDateFormatter'      // Homepage URL of the library
-def gitUrl = 'https://github.com/izacus/FuzzyDateFormatter.git'   // Git repository URL
-group = "<maven group id>"
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'Android Tree List Adapter'
+                description 'An android counterpart for the NSOutlineView based on the RecyclerViewAdapter.'
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'Wilson'
+                        name 'Wilhelm Dewald'
+                        email 'wilhelmdewald@googlemail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:recyclerview-v7:22.0.+'
 }
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        // it is the name that appears in bintray when logged
+        name = "WDTreeList"
+        userOrg = "wilhelm"
+        repo = "maven"
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        labels = ['android']
+        publicDownloadNumbers = true
+        publish = true
+        version {
+            name = project.version //Bintray logical version name
+            desc = 'Description'
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+            }
+            mavenCentralSync {
+//                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
+//                user = properties.getProperty("bintray.oss.user") //OSS user token
+//                password = properties.getProperty("bintray.oss.password") //OSS user password
+//                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+            }
+        }
+    }
+}
+
