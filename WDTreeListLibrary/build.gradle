@@ -2,7 +2,8 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-//https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
+// https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
+// https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
 version = "0.0.2"
 group = "com.github.willybaer.wdtreelist"
@@ -109,10 +110,10 @@ bintray {
                 passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
             }
             mavenCentralSync {
-//                sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
-//                user = properties.getProperty("bintray.oss.user") //OSS user token
-//                password = properties.getProperty("bintray.oss.password") //OSS user password
-//                close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
+                //sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
+                //user = properties.getProperty("bintray.oss.user") //OSS user token
+                //password = properties.getProperty("bintray.oss.password") //OSS user password
+                //close = '1' //Optional property. By default the staging repository is closed and artifacts are released to Maven Central. You can optionally turn this behaviour off (by puting 0 as value) and release the version manually.
             }
         }
     }
