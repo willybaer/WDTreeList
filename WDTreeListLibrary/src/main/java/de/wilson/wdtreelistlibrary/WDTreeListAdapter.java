@@ -203,7 +203,6 @@ public abstract class WDTreeListAdapter<VH extends RecyclerView.ViewHolder, TV e
     public void addChildForParent(WDTreeObject parent, TV newItem) {
 
         if( parent.children.size() == 0) {
-            // Is first entry so nothing sepecial to calculate
             newItem.next = parent.next;
             newItem.prev = parent;
             newItem.position = parent.position + 1;
@@ -211,38 +210,18 @@ public abstract class WDTreeListAdapter<VH extends RecyclerView.ViewHolder, TV e
             parent.next = newItem;
             parent.children.add(newItem);
         } else {
-            // Get the last children of the parent object
-            TV lastChildren = (TV) parent.children.get(parent.children.size() - 1);
-
-            // Iterate down the last childrens tree
-            TV lastItem = lastChildrenForParent((TV) parent);
-
-            newItem.next = lastItem.next;
-            newItem.prev = lastItem;
-            newItem.position = lastItem.position + 1; // That is the problem
-
-            newItem.depth = lastChildren.depth;
-            lastItem.next = newItem;
-
+            TV furtherItem = (TV) parent.children.get(parent.children.size() - 1);
+            newItem.next = furtherItem.next;
+            newItem.prev = furtherItem;
+            newItem.position = furtherItem.position + 1;
+            newItem.depth = furtherItem.depth;
+            furtherItem.next = newItem;
             parent.children.add(newItem);
         }
         mCount++;
         updatePositionAscending((TV) parent);
-
         // animate item
         notifyItemInserted(newItem.position);
-    }
-
-    private TV lastChildrenForParent(TV parent) {
-
-        if ( parent == null)
-            return null;
-
-        if(parent.children == null || parent.children.size() == 0)
-            return parent;
-
-        // Get Last Children of
-        return lastChildrenForParent((TV) parent.children.get(parent.children.size() - 1));
     }
 
     public TV getItemForPosition(int position) {
