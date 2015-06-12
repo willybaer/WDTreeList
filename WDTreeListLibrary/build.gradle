@@ -5,7 +5,7 @@ apply plugin: 'com.jfrog.bintray'
 // https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
 // https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
-version = "0.0.2"
+version = "0.0.3"
 group = "com.github.willybaer.wdtreelist"
 
 def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
@@ -111,7 +111,7 @@ bintray {
         publish = true
         version {
             name = project.version //Bintray logical version name
-            desc = 'Description'
+            desc = 'Fixed the java reference problem. Changed the behaviour of the object handling. Next step: - add helper function to add and remove objects'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
