@@ -17,19 +17,20 @@ import java.util.List;
  * http://en.wikipedia.org/wiki/Linked_list
  *
  */
-public class WDTreeLeaf<T extends WDTreeLeaf> extends Object {
+public class WDTreeLeaf{
 
     // Basic list informations
     private int mDepth = -1;
     private int mPosition = -1;
 
     // Storing reference to all children of this leaf
-    private final List<T> mChildren = new ArrayList<>();
-    public T parent;
+    private final List<WDTreeLeaf> mChildren = new ArrayList<>();
+    public Object mObject;
+    public WDTreeLeaf parent;
 
     // Double linked list logic
-    public T prev;
-    public T next;
+    public WDTreeLeaf prev;
+    public WDTreeLeaf next;
 
     // Other stuff
     public boolean visible = false;
@@ -54,7 +55,7 @@ public class WDTreeLeaf<T extends WDTreeLeaf> extends Object {
         this.mPosition = position;
     }
 
-    public List<T> getChildren()
+    public List<WDTreeLeaf> getChildren()
     {
         return mChildren;
     }

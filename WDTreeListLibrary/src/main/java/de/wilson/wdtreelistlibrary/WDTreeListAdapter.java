@@ -1,6 +1,7 @@
 package de.wilson.wdtreelistlibrary;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.List;
 
@@ -13,17 +14,17 @@ import java.util.List;
  * structure like a the nsoutlineview for mac os
  *
  */
-public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T extends WDTreeLeaf> extends RecyclerView.Adapter<V> {
+public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<V> {
 
     // This object represents our tree
-    protected WDTreeLeaf<T> tree = new WDTreeLeaf();
+    protected WDTreeLeaf tree = new WDTreeLeaf();
 
     private boolean mInvalidates = true;
     private int mCount = 0;
 
 
     // Helper objects for generating the structure
-    private T mPreviousLeaf = null;
+    private WDTreeLeaf mPreviousLeaf = null;
 
     /**
      * Helper function to manage our own data reload
@@ -35,7 +36,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
             mInvalidates = true;
             tree = null;
         }
-
         this.notifyDataSetChanged();
     }
 
@@ -50,13 +50,13 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
     public int getItemCount() {
 
         if(mInvalidates) {
+            mInvalidates = false;
             synchronized (tree) {
                 tree = new WDTreeLeaf();
                 mCount = 0;
                 mPreviousLeaf = null;
                 generateStructure(null, 0, tree.getChildren());
             }
-            mInvalidates = false;
         }
 
         return mCount;
@@ -67,9 +67,9 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
         int type;
 
         synchronized (tree) {
-            T view = getItemForPosition(pos);
-            type = getItemViewType(view);
-            view.viewType = type;
+            WDTreeLeaf item = getItemForPosition(pos);
+            type = getItemViewType(item.mObject);
+            item.viewType = type;
         }
 
         return type;
@@ -77,19 +77,18 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
 
     @Override
     public void onBindViewHolder(V holder, int position) {
-
         // Check if the object List has this object
-        T view = getItemForPosition(position);
-        onBindViewHolder(holder, view);
+        WDTreeLeaf item = getItemForPosition(position);
+        onBindViewHolder(holder, item.mObject);
     }
 
     /**
      *  Our own functionality of a recycler view adapter
      */
-    public abstract int getItemCount(WDTreeLeaf parent);
-    public abstract T getItemObject(WDTreeLeaf parent, int pos, int depth);
-    public abstract int getItemViewType(WDTreeLeaf parent);
-    public abstract void onBindViewHolder(V holder, WDTreeLeaf treeView);
+    public abstract int getItemCount(Object parent);
+    public abstract Object getItemObject(Object parent, int pos, int depth);
+    public abstract int getItemViewType(Object parent);
+    public abstract void onBindViewHolder(V holder, Object treeView);
 
     /**
      * This method helps us to check how much children a paren leaf has
@@ -100,10 +99,10 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
      * @param depth
      * @param parentChildren
      */
-    protected void generateStructure(T parent, int depth, List<T> parentChildren) {
+    protected void generateStructure(WDTreeLeaf parent, int depth, List<WDTreeLeaf> parentChildren) {
 
         // We need the object for each position
-        T currentParent = parent == null ? (T) this.tree : parent;
+        WDTreeLeaf currentParent = parent == null ? this.tree : parent;
 
         // Setup the data of the parent leaf
         currentParent.setPosition(mCount - 1);
@@ -118,7 +117,11 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
             mCount++;
 
             // Getting the children for the index
-            T leaf = getItemObject(parent, i, depth);
+            Object newObject = getItemObject(parent, i, depth); // Here we have to copy the object
+            WDTreeLeaf leaf = new WDTreeLeaf();
+            leaf.mObject = newObject;
+
+            leaf.getChildren().clear();
             if(leaf == null) {
                 continue;
             }
@@ -138,98 +141,26 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
             }
             mPreviousLeaf = leaf;
             generateStructure(leaf, depth + 1, leaf.getChildren());
-
         }
 
-    }
-
-
-
-
-
-
-    /**
-     * Helferlein
-     */
-    private T objectForPosition(T rootitem, int currentPosition, int searchedPosition) {
-
-        // if null
-        if(rootitem == null)
-            return null;
-
-        // Check the normal shit
-        if(currentPosition == searchedPosition) {
-            rootitem.setPosition(currentPosition);
-            return rootitem;
-        }
-
-        if(rootitem.getChildren().size() == 0) {
-            rootitem.setPosition(currentPosition);
-            return rootitem;
-        }
-
-        int currPos = currentPosition;
-        for( int i = 0; i < rootitem.getChildren().size(); i++){
-            T it = objectForPosition((T) rootitem.getChildren().get(i), currPos + 1, searchedPosition);
-            if(it.getPosition() == searchedPosition)
-                return it;
-            else
-                currPos = it.getPosition();
-        }
-
-        rootitem.setPosition(currPos);
-        return rootitem;
+        String bla = "bla";
     }
 
     /**
-     * Unser View holder :D
+     * Funktionierende add child methoden
+     *
+     * @param parentPosition
+     * @param newObject
      */
+    public void addChildForParentPosition(int parentPosition, Object newObject) {
 
-    public void addItemAfter(T currentItem, T newItem) {
+        WDTreeLeaf parent = getItemForPosition(parentPosition);
 
-        newItem.prev = currentItem;
-        newItem.next = currentItem.next;
-        currentItem.next = newItem;
-        int parentPosition = currentItem.parent.getChildren().indexOf(currentItem);
-        currentItem.parent.getChildren().add(parentPosition + 1, newItem);
+        if(parent == null)
+            throw new NullPointerException("");
 
-        // update positions
-        updatePositionAscending(currentItem);
-
-        // animate item
-        notifyItemInserted(newItem.getPosition());
-    }
-
-    private void updatePositionAscending(T currentItem) {
-        if(currentItem.next != null) {
-            currentItem.next.setPosition(currentItem.getPosition() + 1);
-            updatePositionAscending((T) currentItem.next);
-        }
-    }
-
-    public void addItemBefore(T currentItem, T newItem) {
-
-        newItem.next = currentItem;
-        newItem.prev = currentItem.prev;
-        currentItem.prev = newItem;
-        int parentPosition = currentItem.parent.getChildren().indexOf(currentItem);
-        currentItem.parent.getChildren().add(parentPosition, newItem);
-
-        // update positions
-        updatePositionDescending(currentItem);
-
-        // animate item
-        notifyItemInserted(newItem.getPosition());
-    }
-
-    private void updatePositionDescending(T currentItem) {
-        if (currentItem.prev != null) {
-            currentItem.prev.setPosition(currentItem.getPosition() - 1);
-            updatePositionDescending((T) currentItem.prev);
-        }
-    }
-
-    public void addChildForParent(WDTreeLeaf parent, T newItem) {
+        WDTreeLeaf newItem = new WDTreeLeaf();
+        newItem.mObject = newObject;
 
         if( parent.getChildren().size() == 0) {
             // Is first entry so nothing sepecial to calculate
@@ -241,10 +172,10 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
             parent.getChildren().add(newItem);
         } else {
             // Get the last children of the parent object
-            T lastChildren = (T) parent.getChildren().get(parent.getChildren().size() - 1);
+            WDTreeLeaf lastChildren = parent.getChildren().get(parent.getChildren().size() - 1);
 
             // Iterate down the last childrens tree
-            T lastItem = lastChildrenForParent((T) parent);
+            WDTreeLeaf lastItem = lastChildrenForParent(parent);
 
             newItem.next = lastItem.next;
             newItem.prev = lastItem;
@@ -256,13 +187,13 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
             parent.getChildren().add(newItem);
         }
         mCount++;
-        updatePositionAscending((T) parent);
+        updatePositionAscending(parent);
 
         // animate item
         notifyItemInserted(newItem.getPosition());
     }
 
-    private T lastChildrenForParent(T parent) {
+    private WDTreeLeaf lastChildrenForParent(WDTreeLeaf parent) {
 
         if ( parent == null)
             return null;
@@ -270,21 +201,47 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
         if(parent.getChildren() == null || parent.getChildren().size() == 0)
             return parent;
 
-        // Get Last Children of
-        return lastChildrenForParent((T) parent.getChildren().get(parent.getChildren().size() - 1));
+        // Get Last Children of parent
+        return lastChildrenForParent(parent.getChildren().get(parent.getChildren().size() - 1));
     }
 
-    public T getItemForPosition(int position) {
+    public WDTreeLeaf getItemForPosition(int position) {
         if( position == -1 )
-            return (T) tree;
-        T view = tree.next;
-        while( view != null) {
-            if(view.getPosition() == position)
-                return view;
-            view = (T) view.next;
+            return tree;
+        WDTreeLeaf currentItem = tree.next;
+        while( currentItem != null) {
+            if(currentItem.getPosition() == position)
+                return currentItem;
+            currentItem = currentItem.next;
         }
         return null;
     }
+
+
+
+    /**
+     * Helferlein
+     */
+
+    /**
+     * Unser View holder :D
+     */
+
+    private void updatePositionAscending(WDTreeLeaf currentItem) {
+        if(currentItem.next != null) {
+            currentItem.next.setPosition(currentItem.getPosition() + 1);
+            updatePositionAscending(currentItem.next);
+        }
+    }
+
+    private void updatePositionDescending(WDTreeLeaf currentItem) {
+        if (currentItem.prev != null) {
+            currentItem.prev.setPosition(currentItem.getPosition() - 1);
+            updatePositionDescending(currentItem.prev);
+        }
+    }
+
+
 
 
 

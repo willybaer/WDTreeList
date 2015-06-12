@@ -1,15 +1,11 @@
 package de.wilson.wdtreelist;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
@@ -19,7 +15,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
-import de.wilson.wdtreelistlibrary.WDTreeObject;
 
 
 public class MainActivity extends Activity {
@@ -37,7 +32,27 @@ public class MainActivity extends Activity {
         ButterKnife.inject(this);
 
         mList.setLayoutManager(new LinearLayoutManager(this));
-        testObject = new TestObject();
+        testObject = new TestObject("root");
+
+        // Three Children
+        TestObject child1 = new TestObject("child1");
+
+        TestObject child2 = new TestObject("child2");
+        // two children
+        TestObject child21 = new TestObject("child21");
+        TestObject child22 = new TestObject("child22");
+        child2.getChildren().add(child21);
+        child2.getChildren().add(child22);
+        TestObject child3 = new TestObject("child3");
+        // two children
+        TestObject child31 = new TestObject("child31");
+        TestObject child32 = new TestObject("child32");
+        child3.getChildren().add(child31);
+        child3.getChildren().add(child32);
+        testObject.getChildren().add(child1);
+        testObject.getChildren().add(child2);
+        testObject.getChildren().add(child3);
+        
         mAdapter = new TestAdapter(testObject);
         mList.setAdapter(mAdapter);
         mList.setItemAnimator(new DefaultItemAnimator());
@@ -54,40 +69,39 @@ public class MainActivity extends Activity {
             this.object = object;
         }
 
-        @Override
-        public int getItemCount(WDTreeObject parent) {
 
+        @Override
+        public int getItemCount(TestObject parent) {
             if(parent == null)
                 return 1;
             else
-                return object.getChildren().size();
+                return parent.getChildren().size();
         }
 
         @Override
-        public TestObject getItemObject(WDTreeObject parent, int pos, int depth) {
-
+        public TestObject getItemObject(TestObject parent, int pos, int depth) {
             if(parent == null)
                 return object;
             else
-                return object.getChildren().get(pos);
+                return parent.getChildren().get(pos);
 
         }
 
         @Override
-        public int getItemViewType(WDTreeObject parent) {
+        public int getItemViewType(TestObject parent) {
             return 0;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, WDTreeObject treeView) {
-            String pos = treeView.next != null ? ""+treeView.next.position : "None";
+        public void onBindViewHolder(ViewHolder holder, TestObject treeView) {
+            String pos = treeView.next != null ? ""+treeView.next.getPosition() : "None";
 
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.mText.getLayoutParams();
-            int margin = 20 * (treeView.depth + 1);
+            int margin = 20 * (treeView.getDepth() + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom
             holder.mText.setLayoutParams(params);
 
-            holder.mText.setText("Dept: "+treeView.depth);
+            holder.mText.setText("Dept: "+treeView.getDepth());
         }
 
         @Override
@@ -97,6 +111,8 @@ public class MainActivity extends Activity {
                     inflate(R.layout.fragment_test_item, parent, false);
             return new ViewHolder(itemView);
         }
+
+
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -111,8 +127,8 @@ public class MainActivity extends Activity {
 
             @OnClick(R.id.test_button)
             public void onButton(View view) {
-                WDTreeObject entry = mAdapter.getItemForPosition(getAdapterPosition());
-                mAdapter.addChildForParent(entry, new TestObject());
+                TestObject entry = mAdapter.getItemForPosition(getAdapterPosition());
+                mAdapter.addChildForParent(entry, new TestObject("child" + entry.getDepth()));
             }
 
         }
