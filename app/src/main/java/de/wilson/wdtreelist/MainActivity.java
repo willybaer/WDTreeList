@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     }
 
 
-    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder, TestObject> {
+    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder> {
 
         public TestObject object;
 
@@ -71,37 +71,35 @@ public class MainActivity extends Activity {
 
 
         @Override
-        public int getItemCount(TestObject parent) {
+        public int getItemCount(Object parent, int depth) {
             if(parent == null)
                 return 1;
             else
-                return parent.getChildren().size();
+                return ((TestObject)parent).getChildren().size();
         }
 
         @Override
-        public TestObject getItemObject(TestObject parent, int pos, int depth) {
+        public Object getItemObject(Object parent, int pos, int depth) {
             if(parent == null)
                 return object;
             else
-                return parent.getChildren().get(pos);
+                return ((TestObject)parent).getChildren().get(pos);
 
         }
 
         @Override
-        public int getItemViewType(TestObject parent) {
+        public int getItemViewType(Object parent, int depth) {
             return 0;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, TestObject treeView) {
-            String pos = treeView.next != null ? ""+treeView.next.getPosition() : "None";
-
+        public void onBindViewHolder(ViewHolder holder, Object treeView, int depth) {
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.mText.getLayoutParams();
-            int margin = 20 * (treeView.getDepth() + 1);
+            int margin = 20 * (depth + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom
             holder.mText.setLayoutParams(params);
 
-            holder.mText.setText("Dept: "+treeView.getDepth());
+            holder.mText.setText("Dept: "+depth);
         }
 
         @Override
@@ -127,8 +125,7 @@ public class MainActivity extends Activity {
 
             @OnClick(R.id.test_button)
             public void onButton(View view) {
-                TestObject entry = mAdapter.getItemForPosition(getAdapterPosition());
-                mAdapter.addChildForParent(entry, new TestObject("child" + entry.getDepth()));
+                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newChild"));
             }
 
         }

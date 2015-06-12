@@ -68,7 +68,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
 
         synchronized (tree) {
             WDTreeLeaf item = getItemForPosition(pos);
-            type = getItemViewType(item.mObject);
+            type = getItemViewType(item.mObject, item.getDepth());
             item.viewType = type;
         }
 
@@ -79,16 +79,16 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     public void onBindViewHolder(V holder, int position) {
         // Check if the object List has this object
         WDTreeLeaf item = getItemForPosition(position);
-        onBindViewHolder(holder, item.mObject);
+        onBindViewHolder(holder, item.mObject, item.getDepth());
     }
 
     /**
      *  Our own functionality of a recycler view adapter
      */
-    public abstract int getItemCount(Object parent);
+    public abstract int getItemCount(Object parent, int depth);
     public abstract Object getItemObject(Object parent, int pos, int depth);
-    public abstract int getItemViewType(Object parent);
-    public abstract void onBindViewHolder(V holder, Object treeView);
+    public abstract int getItemViewType(Object parent, int depth);
+    public abstract void onBindViewHolder(V holder, Object treeView, int depth);
 
     /**
      * This method helps us to check how much children a paren leaf has
@@ -108,7 +108,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         currentParent.setPosition(mCount - 1);
 
         // We need number of elements at the current depth
-        int count = getItemCount(parent);
+        int count = getItemCount(currentParent.mObject, currentParent.getDepth());
         if( count < 1 )
             return;
 
@@ -117,7 +117,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
             mCount++;
 
             // Getting the children for the index
-            Object newObject = getItemObject(parent, i, depth); // Here we have to copy the object
+            Object newObject = getItemObject(currentParent.mObject, i, depth); // Here we have to copy the object
             WDTreeLeaf leaf = new WDTreeLeaf();
             leaf.mObject = newObject;
 
