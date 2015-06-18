@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class WDTreeLeaf{
 
-    // Basic list informations
+    // Basic list information
     private int mDepth = -1;
     private int mPosition = -1;
 
@@ -59,4 +59,5 @@ public class WDTreeLeaf{
     {
         return mChildren;
     }
+
 }

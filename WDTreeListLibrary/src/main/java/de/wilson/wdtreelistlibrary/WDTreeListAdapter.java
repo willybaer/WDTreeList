@@ -10,8 +10,8 @@ import java.util.List;
  * <p/>
  * Stay cool, stay calm.
  *
- * This class will replacen the RecyclerView.Adapter and will implement a
- * structure like a the nsoutlineview for mac os
+ * This class will replace the RecyclerView.Adapter and will implement a
+ * structure like a the NSOutlineView for mac os
  *
  */
 public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<V> {
@@ -21,8 +21,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
 
     private boolean mInvalidates = true;
     private int mCount = 0;
-
-
+    
     // Helper objects for generating the structure
     private WDTreeLeaf mPreviousLeaf = null;
 
@@ -143,7 +142,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
             generateStructure(leaf, depth + 1, leaf.getChildren());
         }
 
-        String bla = "bla";
     }
 
     /**
@@ -154,6 +152,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
      */
     public void addChildForParentPosition(int parentPosition, Object newObject) {
 
+        // First of all we need the parent tree leaf
         WDTreeLeaf parent = getItemForPosition(parentPosition);
 
         if(parent == null)
