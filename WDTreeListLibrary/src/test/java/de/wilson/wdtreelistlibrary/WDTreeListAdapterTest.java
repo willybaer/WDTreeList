@@ -26,28 +26,31 @@ import static org.junit.Assert.*;
 @Config(constants = BuildConfig.class, emulateSdk = 21)
 public class WDTreeListAdapterTest {
 
-    private WDTreeLeaf<WDTreeLeaf> root;
+    private WDTreeLeaf root;
     private TestAdapter testAdapter;
 
     @Before
     public void setUp() throws Exception {
 
         // Setup the root TreeLeaf
-        root = new WDTreeLeaf<>();
+        root = new WDTreeLeaf();
 
             // Three Children
-            WDTreeLeaf<WDTreeLeaf> child1 = new WDTreeLeaf<>();
+            WDTreeLeaf child1 = new WDTreeLeaf();
+            WDTreeLeaf child2 = new WDTreeLeaf();
 
-            WDTreeLeaf<WDTreeLeaf> child2 = new WDTreeLeaf<>();
                 // two children
-                WDTreeLeaf<WDTreeLeaf> child21 = new WDTreeLeaf<>();
-                WDTreeLeaf<WDTreeLeaf> child22 = new WDTreeLeaf<>();
+                WDTreeLeaf child21 = new WDTreeLeaf();
+                WDTreeLeaf child22 = new WDTreeLeaf();
                 child2.getChildren().add(child21);
                 child2.getChildren().add(child22);
-            WDTreeLeaf<WDTreeLeaf> child3 = new WDTreeLeaf<>();
+
+            WDTreeLeaf child3 = new WDTreeLeaf();
+
                 // two children
-                WDTreeLeaf<WDTreeLeaf> child31 = new WDTreeLeaf<>();
-                WDTreeLeaf<WDTreeLeaf> child32 = new WDTreeLeaf<>();
+                WDTreeLeaf child31 = new WDTreeLeaf();
+                WDTreeLeaf child32 = new WDTreeLeaf();
+
                 child3.getChildren().add(child31);
                 child3.getChildren().add(child32);
             root.getChildren().add(child1);
@@ -60,47 +63,49 @@ public class WDTreeListAdapterTest {
 
     }
 
-    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder, WDTreeLeaf> {
+    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder> {
 
-        public WDTreeLeaf<WDTreeLeaf> object;
+        public TestObject object;
 
         // Provide a suitable constructor (depends on the kind of dataset)
-        public TestAdapter(WDTreeLeaf object) {
+        public TestAdapter(TestObject object) {
             this.object = object;
         }
 
-        @Override
-        public int getItemCount(WDTreeLeaf parent) {
 
+        @Override
+        public int getItemCount(Object parent, int depth) {
             if(parent == null)
                 return 1;
             else
-                return object.getChildren().size();
+                return ((TestObject)parent).getChildren().size();
         }
 
         @Override
-        public WDTreeLeaf getItemObject(WDTreeLeaf parent, int pos, int depth) {
+        public Object getItemObject(Object parent, int pos, int depth) {
             if(parent == null)
                 return object;
             else
-                return object.getChildren().get(pos);
+                return ((TestObject)parent).getChildren().get(pos);
+
         }
 
         @Override
-        public int getItemViewType(WDTreeLeaf parent) {
+        public int getItemViewType(Object parent, int depth) {
             return 0;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, WDTreeLeaf treeView) {
+        public void onBindViewHolder(ViewHolder holder, Object treeView, int depth) {
 
         }
-
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             return null;
         }
+
+
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -108,7 +113,6 @@ public class WDTreeListAdapterTest {
                 super(layout);
 
             }
-
         }
     }
 }

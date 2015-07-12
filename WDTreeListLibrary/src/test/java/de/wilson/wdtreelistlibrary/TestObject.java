@@ -1,10 +1,10 @@
-package de.wilson.wdtreelist;
+package de.wilson.wdtreelistlibrary;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Wilhelm Dewald on 14/05/15.
+ * Created by Wilhelm Dewald on 12/07/15.
  * <p/>
  * Stay cool, stay calm.
  */
