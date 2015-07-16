@@ -239,7 +239,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         if( leafForPosition == null || leafForPosition.parent == null )
             throw new WDException(WDException.WDExceptionType.NO_LEAF_FOR_GIVEN_POSITION);
 
-        WDTreeLeaf lastChildleaf = lastChildrenForParent(leafForPosition); // We need the last leaf the the childs sub tree
+        WDTreeLeaf lastChildLeaf = lastChildrenForParent(leafForPosition); // We need the last leaf the the childs sub tree
 
         WDTreeLeaf parent = leafForPosition.parent; // Needs to be the same parent like the leaf at the given position
 
@@ -248,17 +248,17 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         newItem.mObject = newObject;
 
         // setup new item relations
-        newItem.next = lastChildleaf.next;
-        newItem.prev = lastChildleaf;
+        newItem.next = lastChildLeaf.next;
+        newItem.prev = lastChildLeaf;
         newItem.parent = parent;
 
-        newItem.setPosition(lastChildleaf.getPosition() + 1);
+        newItem.setPosition(lastChildLeaf.getPosition() + 1);
         newItem.setDepth(leafForPosition.getDepth()); // Needs to have the same depth like the leaf
 
         // setup relations of the existing items
-        if(lastChildleaf.next != null)
-            lastChildleaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
-        lastChildleaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
+        if(lastChildLeaf.next != null)
+            lastChildLeaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
+        lastChildLeaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
 
         parent.getChildren().add(newItem);
         mCount++;

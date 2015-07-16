@@ -5,7 +5,7 @@ apply plugin: 'com.jfrog.bintray'
 // https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
 // https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
-version = "0.0.3"
+version = "0.1"
 group = "com.github.willybaer.wdtreelist"
 
 def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
@@ -111,7 +111,9 @@ bintray {
         publish = true
         version {
             name = project.version //Bintray logical version name
-            desc = 'Fixed the java reference problem. Changed the behaviour of the object handling. Next step: - add helper function to add and remove objects'
+            desc = 'Finished version 0.1: Added the base functionality for managing tree lists + added first exception handling.' +
+                    'Version 0.2: We will implement a drad and drop functionality, inspired by these article.' +
+                    'https://medium.com/@ipaulpro/drag-and-swipe-with-recyclerview-b9456d2b1aaf.'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
