@@ -1,25 +1,35 @@
 package de.wilson.wdtreelistlibrary;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.wilson.wdtreelistlibrary.exception.WDException;
 
 /**
  * Created by Wilhelm Dewald on 09/03/15.
  * <p/>
  * Stay cool, stay calm.
  *
- * This class will replace the RecyclerView.Adapter and will implement a
- * structure like a the NSOutlineView for mac os
+ * This class replaces the standard RecyclerView.Adapter and implements
+ * a tree structure inspired by the NSOutlineView class for mac os applications.
+ *
+ * Because of the fact that the standard RecyclerView.Adapter works like a list, we
+ * need a implementation that can handle both, a MapTree and a list behaviour.
+ * So each element has on the one side a relation to its parent leaf and a relation to its previous
+ * and its next leaf.
+ *
+ * We depict the RecyclerView.Adapter interface to our own interface implenentation.
  *
  */
 public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<V> {
 
     // This object represents our tree
+    // (root leaf)
     protected WDTreeLeaf tree = new WDTreeLeaf();
 
+    // Helper attributes
     private boolean mInvalidates = true;
     private int mCount = 0;
     
@@ -41,15 +51,15 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
 
 
     /**
-     * Here we handle the interaction between the recycler views functions
-     * and our new functionality
+     * Here is where the magic starts. At this point the standard RecyclerView.Adapter behaviour starts
+     * creating the list structure and at this point our adapter start to create the tree/list structure
+     *
+     * @return
      */
-
-    // 1. Here is the magic starts -> first of all the size of entries is important
     @Override
     public int getItemCount() {
 
-        if(mInvalidates) {
+        if( mInvalidates ) {
             mInvalidates = false;
             synchronized (tree) {
                 tree = new WDTreeLeaf();
@@ -83,7 +93,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     }
 
     /**
-     *  Our own functionality of a recycler view adapter
+     *  Our interface functions
      */
     public abstract int getItemCount(Object parent, int depth);
     public abstract Object getItemObject(Object parent, int pos, int depth);
@@ -91,9 +101,10 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     public abstract void onBindViewHolder(V holder, Object treeView, int depth);
 
     /**
-     * This method helps us to check how much children a paren leaf has
+     * In this method we check how much children a parent leaf has.
      * And here we will count the amount of all existing leaf, because we need the amount
-     * of leafs for recycler view adapter
+     * of leafs for recycler view adapter. We also generate the parent/children and list structure by
+     * using our abstract functions.
      *
      * @param parent
      * @param depth
@@ -101,11 +112,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
      */
     protected void generateStructure(WDTreeLeaf parent, int depth, List<WDTreeLeaf> parentChildren) {
 
-        // We need the object for each position
-        WDTreeLeaf currentParent = parent == null ? this.tree : parent;
-
-        // Setup the data of the parent leaf
-        currentParent.setPosition(mCount - 1);
+        WDTreeLeaf currentParent = parent == null ? this.tree : parent; // We need the current leaf for each position
+        currentParent.setPosition(mCount - 1); // Setup the position for each leaf
 
         // We need number of elements at the current depth
         int count = getItemCount(currentParent.mObject, currentParent.getDepth());
@@ -113,7 +121,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
             return;
 
         // Here we generate the subtree structure
-        for(int i = 0; i < count; i++){
+        for( int i = 0; i < count; i++ ){
             mCount++;
 
             // Getting the children for the index
@@ -122,31 +130,47 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
             leaf.mObject = newObject;
 
             leaf.getChildren().clear();
-            if(leaf == null) {
+            if( leaf == null ) {
                 continue;
             }
 
-            // Climb down the subtree
+            // Setup relations
             parentChildren.add(leaf);
             leaf.parent = currentParent;
             leaf.setDepth(depth);
-            if (i == 0) {
+
+            if ( i == 0 ) {
+
                 leaf.next = currentParent.next;
                 currentParent.next = leaf;
                 leaf.prev = currentParent;
+
             } else {
+
                 leaf.next = mPreviousLeaf.next;
                 mPreviousLeaf.next = leaf;
                 leaf.prev = mPreviousLeaf;
+
             }
-            mPreviousLeaf = leaf;
+
+            mPreviousLeaf = leaf; // We need the information about the previous leaf for setting up the correct list relation
             generateStructure(leaf, depth + 1, leaf.getChildren());
         }
 
     }
 
     /**
-     * Function for appending new child for the parent item position
+     * Helper for appending a new root child. If there is an empty tree.
+     *
+     * @param newObject
+     */
+    public void addRootChild(Object newObject) {
+        addChildForParentPosition(-1, newObject);
+    }
+
+    /**
+     * Function for appending new child to the parents child list.
+     * The new child gets added to the last chil position.
      *
      * @param parentPosition
      * @param newObject
@@ -156,22 +180,26 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         // First of all we need the parent tree leaf
         WDTreeLeaf parent = getItemForPosition(parentPosition);
 
-        if(parent == null)
-            throw new NullPointerException("");
+        if( parent == null )
+            throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
         WDTreeLeaf newItem = new WDTreeLeaf();
         newItem.mObject = newObject;
 
         if( parent.getChildren().size() == 0) {
+
             // Is first entry so nothing special to calculate
             newItem.next = parent.next;
             newItem.prev = parent;
+
             newItem.setPosition(parent.getPosition() + 1);
             newItem.setDepth(parent.getDepth() + 1);
+
             parent.next = newItem;
             parent.getChildren().add(newItem);
 
         } else {
+
             // Get the last children of the parent object
             WDTreeLeaf lastChildren = parent.getChildren().get(parent.getChildren().size() - 1);
 
@@ -180,13 +208,15 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
 
             newItem.next = lastItem.next;
             newItem.prev = lastItem;
-            newItem.setPosition(lastItem.getPosition() + 1); // That is the problem
 
+            newItem.setPosition(lastItem.getPosition() + 1);
             newItem.setDepth(lastChildren.getDepth());
-            lastItem.next = newItem;
 
+            lastItem.next = newItem;
             parent.getChildren().add(newItem);
+
         }
+
         mCount++;
         updatePositionAscending(parent);
 
@@ -195,40 +225,40 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     }
 
     /**
-     * Function for appending new object at the same depth like the current leafs position
+     * Function for appending new object at the same depth like the current leafs position and
+     * the one position after the childs position.
      *
      * @param childPosition
      * @param newObject
      */
     public void addChildAfterChildPosition(int childPosition, Object newObject) {
 
-        // Hier müssen wir nich von der leaf position ausgehen, sondern vom letzten innerhalb des Leaf`s
-
         // First of all we need the parent tree leaf
         WDTreeLeaf leafForPosition = getItemForPosition(childPosition);
-        WDTreeLeaf leaf = lastChildrenForParent(leafForPosition);
 
+        if( leafForPosition == null || leafForPosition.parent == null )
+            throw new WDException(WDException.WDExceptionType.NO_LEAF_FOR_GIVEN_POSITION);
 
-        if(leaf == null || leafForPosition.parent == null)
-            throw new NullPointerException("");
+        WDTreeLeaf lastChildleaf = lastChildrenForParent(leafForPosition); // We need the last leaf the the childs sub tree
 
         WDTreeLeaf parent = leafForPosition.parent; // Needs to be the same parent like the leaf at the given position
 
+        // Setup new item
         WDTreeLeaf newItem = new WDTreeLeaf();
         newItem.mObject = newObject;
 
         // setup new item relations
-        newItem.next = leaf.next;
-        newItem.prev = leaf;
+        newItem.next = lastChildleaf.next;
+        newItem.prev = lastChildleaf;
         newItem.parent = parent;
 
-        newItem.setPosition(leaf.getPosition() + 1);
+        newItem.setPosition(lastChildleaf.getPosition() + 1);
         newItem.setDepth(leafForPosition.getDepth()); // Needs to have the same depth like the leaf
 
         // setup relations of the existing items
-        if(leaf.next != null)
-            leaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
-        leaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
+        if(lastChildleaf.next != null)
+            lastChildleaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
+        lastChildleaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
 
         parent.getChildren().add(newItem);
         mCount++;
@@ -242,7 +272,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
 
     /**
      * Function for appending new object at the same depth like the current leafs
-     * position but add the new leaf before the given leaf
+     * position, but adds the new leaf before the given leaf
      *
      * @param childPosition
      * @param newObject
@@ -252,8 +282,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         // First of all we need the parent tree leaf
         WDTreeLeaf leaf = getItemForPosition(childPosition);
 
-        if(leaf == null || leaf.parent == null)
-            throw new NullPointerException("");
+        if( leaf == null || leaf.parent == null )
+            throw new WDException(WDException.WDExceptionType.NO_LEAF_FOR_GIVEN_POSITION);
 
         WDTreeLeaf parent = leaf.parent;
 
@@ -283,7 +313,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     }
 
     /**
-     * Removes leaf for position
+     * Removes leaf for the given position.
+     *
      * @param childPosition
      */
     public void removeChildForPosition(int childPosition) {
@@ -311,10 +342,10 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     }
 
     private void removeAllChildrenIncParentAnimated(WDTreeLeaf parent) {
-        if( parent == null)
+        if( parent == null )
             return;
 
-        for(WDTreeLeaf childLeaf : parent.getChildren()) {
+        for( WDTreeLeaf childLeaf : parent.getChildren() ) {
             removeAllChildrenIncParentAnimated(childLeaf);
         }
         notifyItemRemoved(parent.getPosition());
@@ -330,32 +361,34 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         // First of all we need the parent tree leaf
         WDTreeLeaf parent = getItemForPosition(parentPosition);
 
-        if(parent == null || parent.parent == null)
-            throw new NullPointerException("");
+        if( parent == null || parent.parent == null )
+            throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
         // setup relations only if our parent object has more than 1 children
         if ( parent.parent.getChildren().size() > 1 ) {
-            WDTreeLeaf nextParentChild = parent.parent.getChildren().get(parent.parent.getChildren().size() - 1);
 
+            WDTreeLeaf nextParentChild = parent.parent.getChildren().get(parent.parent.getChildren().size() - 1);
             parent.next = nextParentChild;
             nextParentChild.prev = parent;
 
         } else
             parent.next = null;
 
-        ArrayList<WDTreeLeaf> clearedChildren = new ArrayList<>(parent.getChildren()); // 1. Copy all cleared children
+        ArrayList<WDTreeLeaf> clearedChildren = new ArrayList<>(parent.getChildren()); // 1. Copy all deleted children, needed for the animation
         parent.getChildren().clear(); // 2. Remove all items
 
+        // update the position
         updatePositionAscending(parent);
 
-        // animated it for each removed item
+        // animated deletion for each removed item
         for(WDTreeLeaf removedLeaf : clearedChildren) {
             removeAllChildrenIncParentAnimated(removedLeaf);
         }
     }
 
     /**
-     * Returns the object for a given position, if there is no object for a position
+     * Returns the object for a given position.
+     *
      * @param position
      * @return
      */
@@ -364,46 +397,69 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         return leaf != null ? leaf.mObject : null;
     }
 
-    /**
+    /*************************
+     *
      * Private helper functions
+     *
+     *************************/
+
+    /**
+     * This function is need to find the last child of the sub tree of a given parent leaf.
+     *
+     * @param parent
+     * @return
      */
     private WDTreeLeaf lastChildrenForParent(WDTreeLeaf parent) {
 
         if ( parent == null)
             return null;
 
-        if(parent.getChildren() == null || parent.getChildren().size() == 0)
+        if( parent.getChildren() == null || parent.getChildren().size() == 0 )
             return parent;
 
         // Get Last Children of parent
         return lastChildrenForParent(parent.getChildren().get(parent.getChildren().size() - 1));
     }
 
+    /**
+     * This function return the leaf for a given position.
+     *
+     * @param position
+     * @return
+     */
     private WDTreeLeaf getItemForPosition(int position) {
+
+        if( position < -1 )
+            throw new WDException(WDException.WDExceptionType.FORBIDDEN_POSITION);
+
         if( position == -1 )
             return tree;
+
         WDTreeLeaf currentItem = tree.next;
-        while( currentItem != null) {
-            if(currentItem.getPosition() == position)
+
+        while( currentItem != null ) {
+            if( currentItem.getPosition() == position )
                 return currentItem;
             currentItem = currentItem.next;
         }
+
         return null;
     }
 
     /**
-     * This functions are helping us to manage the the leaf positions after a succesful add/remove of a leaf
+     * This functions are re managing the leaf positions after a successful add/remove of a leaf
+     *
      * @param currentItem
      */
     private void updatePositionAscending(WDTreeLeaf currentItem) {
-        if(currentItem.next != null) {
+        if( currentItem.next != null ) {
             currentItem.next.setPosition(currentItem.getPosition() + 1);
             updatePositionAscending(currentItem.next);
         }
     }
 
     private void updatePositionDescending(WDTreeLeaf currentItem) {
-        if (currentItem.prev != null) {
+        if ( currentItem.prev != null ) {
             currentItem.prev.setPosition(currentItem.getPosition() - 1);
             updatePositionDescending(currentItem.prev);
         }

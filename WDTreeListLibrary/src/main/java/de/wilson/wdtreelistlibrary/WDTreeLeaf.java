@@ -11,7 +11,8 @@ import java.util.List;
  * This object represents our tree leaf.
  *
  * For a better interaction with the recycler list adapter we
- * implement the basic logic of a doubly linked list data structure
+ * implement the basic logic of a doubly linked list data structure and
+ * the map tree logic
  *
  * Have a look on the following wikipedia article for more informations
  * http://en.wikipedia.org/wiki/Linked_list
@@ -23,7 +24,7 @@ public class WDTreeLeaf{
     private int mDepth = -1;
     private int mPosition = -1;
 
-    // Storing reference to all children of this leaf
+    // Need for the map tree logic
     private final List<WDTreeLeaf> mChildren = new ArrayList<>();
     public Object mObject;
     public WDTreeLeaf parent;
