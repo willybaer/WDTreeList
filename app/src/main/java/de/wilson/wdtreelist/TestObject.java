@@ -3,6 +3,8 @@ package de.wilson.wdtreelist;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.wilson.wdtreelistlibrary.WDTreeLeaf;
+
 /**
  * Created by Wilhelm Dewald on 14/05/15.
  * <p/>
