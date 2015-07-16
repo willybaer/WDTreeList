@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -94,7 +95,7 @@ public class MainActivity extends Activity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, Object treeView, int depth) {
-            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams)holder.mText.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)holder.mText.getLayoutParams();
             int margin = 20 * (depth + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom
             holder.mText.setLayoutParams(params);
@@ -123,11 +124,25 @@ public class MainActivity extends Activity {
 
             }
 
-            @OnClick(R.id.test_button)
-            public void onButton(View view) {
-                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newChild"));
+            @OnClick(R.id.add_children_last_position)
+            public void onButton1(View view) {
+                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newLastChild"));
             }
 
+            @OnClick(R.id.add_children_before_children)
+            public void onButton2(View view) {
+                mAdapter.addChildAfterChildPosition(getAdapterPosition(), new TestObject("newChildAfterChild: " + mText));
+            }
+
+            @OnClick(R.id.remove_children)
+            public void onButton3(View view) {
+                mAdapter.removeChildForPosition(getAdapterPosition());
+            }
+
+            @OnClick(R.id.remove_all_children)
+            public void onButton4(View view) {
+                mAdapter.removeAllChildrenForParent(getAdapterPosition());
+            }
         }
     }
 
