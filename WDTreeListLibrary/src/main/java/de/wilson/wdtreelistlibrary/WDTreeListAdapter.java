@@ -23,17 +23,16 @@ import de.wilson.wdtreelistlibrary.exception.WDException;
  * We depict the RecyclerView.Adapter interface to our own interface implenentation.
  *
  */
-public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<V> {
+public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
+        extends RecyclerView.Adapter<V> {
 
     // This object represents our tree
     // (root leaf)
     protected WDTreeLeaf tree = new WDTreeLeaf();
 
-    // Helper attributes
     private boolean mInvalidates = true;
     private int mCount = 0;
-    
-    // Helper objects for generating the structure
+
     private WDTreeLeaf mPreviousLeaf = null;
 
     /**
@@ -98,7 +97,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
     public abstract int getItemCount(Object parent, int depth);
     public abstract Object getItemObject(Object parent, int pos, int depth);
     public abstract int getItemViewType(Object parent, int depth);
-    public abstract void onBindViewHolder(V holder, Object treeView, int depth);
+    public abstract void onBindViewHolder(V holder, Object leaf, int depth);
 
     /**
      * In this method we check how much children a parent leaf has.
@@ -115,26 +114,23 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
         WDTreeLeaf currentParent = parent == null ? this.tree : parent; // We need the current leaf for each position
         currentParent.setPosition(mCount - 1); // Setup the position for each leaf
 
-        // We need number of elements at the current depth
-        int count = getItemCount(currentParent.mObject, currentParent.getDepth());
+        int count = getItemCount(currentParent.mObject, currentParent.getDepth()); // calling the new itemCount function with the subtree depth
         if( count < 1 )
             return;
 
-        // Here we generate the subtree structure
+        // Subtree structure
         for( int i = 0; i < count; i++ ){
             mCount++;
 
             // Getting the children for the index
             Object newObject = getItemObject(currentParent.mObject, i, depth); // Here we have to copy the object
+            if(newObject == null)
+                throw new WDException(WDException.WDExceptionType.ITEM_OBJECT_CALLBACK_NULL_OBJECT);
+
             WDTreeLeaf leaf = new WDTreeLeaf();
             leaf.mObject = newObject;
-
             leaf.getChildren().clear();
-            if( leaf == null ) {
-                continue;
-            }
 
-            // Setup relations
             parentChildren.add(leaf);
             leaf.parent = currentParent;
             leaf.setDepth(depth);
@@ -177,7 +173,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder> exten
      */
     public void addChildForParentPosition(int parentPosition, Object newObject) {
 
-        // First of all we need the parent tree leaf
         WDTreeLeaf parent = getItemForPosition(parentPosition);
 
         if( parent == null )
