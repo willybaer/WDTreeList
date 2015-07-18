@@ -27,5 +27,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:22.0.+'
     // Butterknife for view injection
     compile 'com.jakewharton:butterknife:6.1.0'
-    compile project(':WDTreeListLibrary')
+    //compile project(':WDTreeListLibrary')
+    compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.1'
 }
