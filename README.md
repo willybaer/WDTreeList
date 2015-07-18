@@ -26,3 +26,22 @@ Return the viewType for the children of the given parent object.
 
 ##### void onBindViewHolder(V holder, Object leaf, int depth)
 Setup the content of the ViewHolder.
+
+------
+### Helper functions
+#### Append new entry
+```Java
+public void addRootChild(Object newObject)
+public void addChildForParentPosition(int parentPosition, Object newObject)
+public void addChildAfterChildPosition(int childPosition, Object newObject)
+public void addChildBeforeChildPosition(int childPosition, Object newObject)
+```
+#### Remove entry
+```Java
+public void removeChildForPosition(int childPosition)
+public  void removeAllChildrenForParent(int parentPosition)
+```
+#### Search functions
+```Java
+public Object getObjectForPosition(int position)
+```
