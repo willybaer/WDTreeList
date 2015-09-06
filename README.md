@@ -4,11 +4,11 @@
 This library spports a tree list implementation for a RecyclerView. Inspired by the NSOUtlineView ( AppKit Framework ), this library is based on the RecyclerView.Adapter.
 
 ### Version
-0.1.1
+0.1.3
 
 ### Gradle
 ```Java
-compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.1'
+compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.3'
 ```
 
 ### Example
