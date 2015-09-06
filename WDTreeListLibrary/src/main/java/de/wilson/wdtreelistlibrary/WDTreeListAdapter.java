@@ -181,6 +181,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         WDTreeLeaf newItem = new WDTreeLeaf();
         newItem.mObject = newObject;
+        newItem.parent = parent; // setting up parent object relation
 
         if( parent.getChildren().size() == 0) {
 
@@ -192,25 +193,29 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
             newItem.setDepth(parent.getDepth() + 1);
 
             parent.next = newItem;
-            parent.getChildren().add(newItem);
+            if(newItem.next != null)
+                newItem.next.prev = newItem; // setting next item prev relation to the new item
 
+            parent.getChildren().add(newItem);
         } else {
 
             // Get the last children of the parent object
             WDTreeLeaf lastChildren = parent.getChildren().get(parent.getChildren().size() - 1);
 
             // Iterate down to the last children tree
-            WDTreeLeaf lastItem = lastChildrenForParent(parent);
+            WDTreeLeaf lastItem = lastChildrenForParent(lastChildren);
 
             newItem.next = lastItem.next;
             newItem.prev = lastItem;
 
             newItem.setPosition(lastItem.getPosition() + 1);
-            newItem.setDepth(lastChildren.getDepth());
+            newItem.setDepth(parent.getDepth() + 1);
 
             lastItem.next = newItem;
-            parent.getChildren().add(newItem);
+            if(newItem.next != null)
+                newItem.next.prev = newItem; // setting next item prev relation to the new item
 
+            parent.getChildren().add(newItem);
         }
 
         mCount++;
@@ -333,12 +338,10 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if(nextLeaf == null)
             nextLeaf = leaf;
 
-        if(nextLeaf != null && nextLeaf.next != null)
-            Log.d("Next-Leaf-Position", "pos: " + nextLeaf.next.getPosition());
-
         // setup relations
         prevLeaf.next = nextLeaf.next;
-        nextLeaf.next.prev = prevLeaf;
+        if(nextLeaf.next != null)
+            nextLeaf.next.prev = prevLeaf; // setting up next leaf prev relation only if there is a next object
 
         // remove leaf from the parent
         parent.getChildren().remove(leaf);
