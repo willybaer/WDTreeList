@@ -11,6 +11,7 @@ This library spports a tree list implementation for a RecyclerView. Inspired by 
 compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.3'
 ```
 
+
 ------
 ### How To
 The usage of the WDTreeListAdapter is similiar to the standard RecyclerView.Adapter. Only extend the WDTreeListAdapter and implement the necessary methods.
