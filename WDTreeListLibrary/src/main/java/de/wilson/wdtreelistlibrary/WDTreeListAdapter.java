@@ -1,6 +1,7 @@
 package de.wilson.wdtreelistlibrary;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -217,6 +218,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // animate item
         notifyItemInserted(newItem.getPosition());
+
+        printLeafPositionAndDepth();
     }
 
     /**
@@ -263,6 +266,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // animate item
         notifyItemInserted(newItem.getPosition());
+
+        printLeafPositionAndDepth();
     }
 
     /**
@@ -318,13 +323,22 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         WDTreeLeaf leaf = getItemForPosition(childPosition);
 
         if(leaf == null || leaf.parent == null)
-            throw new NullPointerException("");
+            throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
         WDTreeLeaf parent = leaf.parent;
         WDTreeLeaf prevLeaf = leaf.prev;
 
+        // find next leaf
+        WDTreeLeaf nextLeaf = lastChildrenForParent(leaf);
+        if(nextLeaf == null)
+            nextLeaf = leaf;
+
+        if(nextLeaf != null && nextLeaf.next != null)
+            Log.d("Next-Leaf-Position", "pos: " + nextLeaf.next.getPosition());
+
         // setup relations
-        prevLeaf.next = leaf.next;
+        prevLeaf.next = nextLeaf.next;
+        nextLeaf.next.prev = prevLeaf;
 
         // remove leaf from the parent
         parent.getChildren().remove(leaf);
@@ -334,17 +348,20 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // animate item + sub item to be removed
         removeAllChildrenIncParentAnimated(leaf);
+
+        printLeafPositionAndDepth();
     }
 
     private void removeAllChildrenIncParentAnimated(WDTreeLeaf parent) {
         if( parent == null )
             return;
 
-        for( WDTreeLeaf childLeaf : parent.getChildren() ) {
-            removeAllChildrenIncParentAnimated(childLeaf);
-        }
-        notifyItemRemoved(parent.getPosition());
-        mCount--;
+        int parentPosition = parent.getPosition();
+        int lastChildPosition = lastChildrenForParent(parent).getPosition();
+        int range = lastChildPosition - parentPosition + 1;
+        notifyItemRangeRemoved(parentPosition, range);
+
+        mCount -= range;
     }
 
     /**
@@ -379,6 +396,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         for(WDTreeLeaf removedLeaf : clearedChildren) {
             removeAllChildrenIncParentAnimated(removedLeaf);
         }
+
+        printLeafPositionAndDepth();
     }
 
     /**
@@ -460,4 +479,11 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         }
     }
 
+    private void printLeafPositionAndDepth() {
+        WDTreeLeaf leaf = tree;
+        while (leaf != null) {
+            Log.d("PRINT", "Position: "+leaf.getPosition() +" depth:"+leaf.getDepth());
+            leaf = leaf.next;
+        }
+    }
 }
