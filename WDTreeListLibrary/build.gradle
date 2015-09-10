@@ -5,19 +5,20 @@ apply plugin: 'com.jfrog.bintray'
 // https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
 // https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
-version = "0.1.4"
+
+version = "0.1.5"
 group = "com.github.willybaer.wdtreelist"
 
 def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
 def gitUrl = 'https://github.com/willybaer/WDTreeList.git'   // Git repository URL
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.0"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 1
         versionName version
     }
@@ -59,8 +60,8 @@ install {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.android.support:appcompat-v7:23.0.0'
+    compile 'com.android.support:recyclerview-v7:23.0.0'
 
     // Test libraries
     testCompile 'junit:junit:4.12'
@@ -111,7 +112,7 @@ bintray {
         publish = true
         version {
             name = project.version //Bintray logical version name
-            desc = 'Version 0.1.4: Tested all helper functions. Should now work!!'
+            desc = 'Version 0.1.5: Updated support libraries to new version 23.0.0 and cleaned up some code parts.'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'

@@ -184,7 +184,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         newItem.parent = parent; // setting up parent object relation
 
         if( parent.getChildren().size() == 0) {
-
             // Is first entry so nothing special to calculate
             newItem.next = parent.next;
             newItem.prev = parent;
@@ -198,7 +197,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
             parent.getChildren().add(newItem);
         } else {
-
             // Get the last children of the parent object
             WDTreeLeaf lastChildren = parent.getChildren().get(parent.getChildren().size() - 1);
 
@@ -223,8 +221,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // animate item
         notifyItemInserted(newItem.getPosition());
-
-        printLeafPositionAndDepth();
     }
 
     /**
@@ -271,8 +267,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // animate item
         notifyItemInserted(newItem.getPosition());
-
-        printLeafPositionAndDepth();
     }
 
     /**
@@ -343,29 +337,18 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if(nextLeaf.next != null)
             nextLeaf.next.prev = prevLeaf; // setting up next leaf prev relation only if there is a next object
 
+        // First, we have to do the animation
+        // animate item + sub item to be removed
+        removeAllChildrenIncParentAnimated(leaf);
+
         // remove leaf from the parent
         parent.getChildren().remove(leaf);
 
         // update position
         updatePositionAscending(parent);
-
-        // animate item + sub item to be removed
-        removeAllChildrenIncParentAnimated(leaf);
-
-        printLeafPositionAndDepth();
     }
 
-    private void removeAllChildrenIncParentAnimated(WDTreeLeaf parent) {
-        if( parent == null )
-            return;
 
-        int parentPosition = parent.getPosition();
-        int lastChildPosition = lastChildrenForParent(parent).getPosition();
-        int range = lastChildPosition - parentPosition + 1;
-        notifyItemRangeRemoved(parentPosition, range);
-
-        mCount -= range;
-    }
 
     /**
      * Removes all children for a parent position
@@ -379,28 +362,25 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if( parent == null || parent.parent == null )
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
-        // setup relations only if our parent object has more than 1 children
-        if ( parent.parent.getChildren().size() > 1 ) {
+        // Return if there are no children for parent
+        if(parent.getChildren().size() == 0)
+            return;
 
-            WDTreeLeaf nextParentChild = parent.parent.getChildren().get(parent.parent.getChildren().size() - 1);
-            parent.next = nextParentChild;
-            nextParentChild.prev = parent;
+        // Setup relations only if our parent object has more than 1 children
+        WDTreeLeaf lastChildForParent = lastChildrenForParent(parent);
+        parent.next = lastChildForParent.next;
 
-        } else
-            parent.next = null;
+        if(lastChildForParent.next != null)
+            lastChildForParent.next.prev = parent;
 
-        ArrayList<WDTreeLeaf> clearedChildren = new ArrayList<>(parent.getChildren()); // 1. Copy all deleted children, needed for the animation
-        parent.getChildren().clear(); // 2. Remove all items
+        // Animated deletion for each removed item
+        removeAllChildrenForParentAnimated(parent);
 
-        // update the position
+        // Remove all children from parent
+        parent.getChildren().clear();
+
+        // Update the position
         updatePositionAscending(parent);
-
-        // animated deletion for each removed item
-        for(WDTreeLeaf removedLeaf : clearedChildren) {
-            removeAllChildrenIncParentAnimated(removedLeaf);
-        }
-
-        printLeafPositionAndDepth();
     }
 
     /**
@@ -482,11 +462,40 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         }
     }
 
-    private void printLeafPositionAndDepth() {
-        WDTreeLeaf leaf = tree;
-        while (leaf != null) {
-            Log.d("PRINT", "Position: "+leaf.getPosition() +" depth:"+leaf.getDepth());
-            leaf = leaf.next;
-        }
+    /**
+     * Animates item deletion inside the recycler view list:
+     *
+     * Here we animate the the deletion of the parent item and including its children
+     * @param parent
+     */
+    private void removeAllChildrenIncParentAnimated(WDTreeLeaf parent) {
+        if( parent == null )
+            return;
+
+        int parentPosition = parent.getPosition();
+        int lastChildPosition = lastChildrenForParent(parent).getPosition();
+        int range = lastChildPosition - parentPosition + 1;
+        notifyItemRangeRemoved(parentPosition, range);
+
+        mCount -= range;
     }
+
+    /**
+     * Animates item deletion inside the recycler view list:
+     *
+     * Here we animate the the deletion of children
+     * @param parent
+     */
+    private void removeAllChildrenForParentAnimated(WDTreeLeaf parent) {
+        if( parent == null )
+            return;
+
+        int parentPosition = parent.getPosition();
+        int lastChildPosition = lastChildrenForParent(parent).getPosition();
+        int range = lastChildPosition - parentPosition;
+        notifyItemRangeRemoved(parentPosition + 1, range);
+
+        mCount -= range;
+    }
+
 }
