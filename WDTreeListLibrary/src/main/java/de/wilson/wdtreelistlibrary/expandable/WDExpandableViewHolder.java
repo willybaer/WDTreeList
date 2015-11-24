@@ -3,8 +3,8 @@ package de.wilson.wdtreelistlibrary.expandable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 
 
 /**
@@ -13,7 +13,7 @@ import android.view.animation.ScaleAnimation;
 public class WDExpandableViewHolder extends RecyclerView.ViewHolder implements Animation.AnimationListener {
 
     // Constants
-    private static final int ANIMATION_DURATION = 1000; // 1s
+    private static final int ANIMATION_DURATION = 300; // 0.3s
 
     // Attributes
     private View mRootView;
@@ -27,7 +27,11 @@ public class WDExpandableViewHolder extends RecyclerView.ViewHolder implements A
     public WDExpandableViewHolder(View itemView, boolean isExpanded) {
         super(itemView);
         mRootView = itemView.getRootView();
-        mRootViewHeight = itemView.getMeasuredHeight();
+
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        mRootView.measure(widthMeasureSpec, heightMeasureSpec);
+        mRootViewHeight = mRootView.getMeasuredHeight();
         setIsExpanded(isExpanded);
     }
 
@@ -50,11 +54,7 @@ public class WDExpandableViewHolder extends RecyclerView.ViewHolder implements A
 
     private Animation getExpandAnimation() {
         if (mExpandAnimation == null) {
-            mExpandAnimation = new ScaleAnimation(
-                    1f, 1f, // Start and end values for the X axis scaling
-                    0f, 1f, // Start and end values for the Y axis scaling
-                    Animation.RELATIVE_TO_SELF, 1f, // Pivot point of X scaling
-                    Animation.RELATIVE_TO_SELF, 1f); // Pivot point of Y scaling
+            mExpandAnimation = new AlphaAnimation(0.0f, 1.0f);
             mExpandAnimation.setFillAfter(true);
             mExpandAnimation.setDuration(ANIMATION_DURATION);
             mExpandAnimation.setAnimationListener(this);
@@ -65,17 +65,14 @@ public class WDExpandableViewHolder extends RecyclerView.ViewHolder implements A
 
     private Animation getCollapseAnimation() {
         if (mCollapseAnimation == null) {
-            mCollapseAnimation = new ScaleAnimation(
-                    1f, 1f, // Start and end values for the X axis scaling
-                    1f, 0f, // Start and end values for the Y axis scaling
-                    Animation.RELATIVE_TO_SELF, 1f, // Pivot point of X scaling
-                    Animation.RELATIVE_TO_SELF, 0f); // Pivot point of Y scaling
+
+            mCollapseAnimation = new AlphaAnimation(1.0f, 0.0f);
             mCollapseAnimation.setFillAfter(true);
             mCollapseAnimation.setDuration(ANIMATION_DURATION);
             mCollapseAnimation.setAnimationListener(this);
 
         }
-        return mExpandAnimation;
+        return mCollapseAnimation;
     }
 
     /*
