@@ -15,6 +15,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
+import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
 //import de.wilson.wdtreelistlibrary.expandable.MyLinearLayoutManager;
 //import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
 
@@ -78,18 +79,18 @@ public class ExpandableActivity extends Activity {
 
         @Override
         public int getItemCount(Object parent, int depth) {
-            if(parent == null)
+            if (parent == null)
                 return 1;
             else
-                return ((TestObject)parent).getChildren().size();
+                return ((TestObject) parent).getChildren().size();
         }
 
         @Override
         public Object getItemObject(Object parent, int pos, int depth) {
-            if(parent == null)
+            if (parent == null)
                 return object;
             else
-                return ((TestObject)parent).getChildren().get(pos);
+                return ((TestObject) parent).getChildren().get(pos);
 
         }
 
@@ -99,16 +100,22 @@ public class ExpandableActivity extends Activity {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, Object leaf, int depth) {
+        public void onBindViewHolder(final ViewHolder holder, Object leaf, int depth) {
 
 
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)holder.mText.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();
 
             int margin = 20 * (depth + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom
             holder.mText.setLayoutParams(params);
-            holder.mText.setText("Dept: "+depth);
+            holder.mText.setText("Dept: " + depth);
 
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    holder.collapse();
+                }
+            });
             /*if(depth <= 1)
                 holder.setExpanded(true);
             else
@@ -125,21 +132,15 @@ public class ExpandableActivity extends Activity {
         }
 
 
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends WDExpandableViewHolder {
 
             // each data item is just a string in this case
-            @InjectView(R.id.test_text) public TextView mText;
+            @InjectView(R.id.test_text)
+            public TextView mText;
 
             public ViewHolder(View layout, boolean isExpandable) {
-                super(layout);
+                super(layout, true);
                 ButterKnife.inject(this, layout);
-                /*layout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        expandChildren();
-                    }
-                });*/
             }
 
             @OnClick(R.id.add_children_last_position)

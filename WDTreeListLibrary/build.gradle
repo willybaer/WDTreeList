@@ -14,7 +14,7 @@ def gitUrl = 'https://github.com/willybaer/WDTreeList.git'   // Git repository U
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -60,8 +60,8 @@ install {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.0.0'
-    compile 'com.android.support:recyclerview-v7:23.0.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
 
     // Test libraries
     testCompile 'junit:junit:4.12'
@@ -115,7 +115,8 @@ bintray {
             desc = 'Version 0.1.5: Updated support libraries to new version 23.0.0 and cleaned up some code parts.'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
-                passphrase = properties.getProperty("bintray.gpg.password") //Optional. The passphrase for GPG signing'
+                passphrase = properties.getProperty("bintray.gpg.password")
+                //Optional. The passphrase for GPG signing'
             }
             mavenCentralSync {
                 //sync = true //Optional (true by default). Determines whether to sync the version to Maven Central.
