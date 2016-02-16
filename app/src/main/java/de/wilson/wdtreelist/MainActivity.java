@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
         testObject.getChildren().add(child1);
         testObject.getChildren().add(child2);
         testObject.getChildren().add(child3);
-        
+
         mAdapter = new TestAdapter(testObject);
         mList.setAdapter(mAdapter);
         mList.setItemAnimator(new DefaultItemAnimator());
@@ -72,23 +72,23 @@ public class MainActivity extends Activity {
 
         @Override
         public int getItemCount(Object parent, int depth) {
-            if(parent == null)
+            if (parent == null)
                 return 1;
             else
-                return ((TestObject)parent).getChildren().size();
+                return ((TestObject) parent).getChildren().size();
         }
 
         @Override
-        public boolean itemIsExpanded(Object parent, int depth) {
+        public boolean itemIsCollapsed(Object parent, int depth) {
             return false;
         }
 
         @Override
         public Object getItemObject(Object parent, int pos, int depth) {
-            if(parent == null)
+            if (parent == null)
                 return object;
             else
-                return ((TestObject)parent).getChildren().get(pos);
+                return ((TestObject) parent).getChildren().get(pos);
 
         }
 
@@ -99,12 +99,12 @@ public class MainActivity extends Activity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, Object leaf, int depth) {
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)holder.mText.getLayoutParams();
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();
             int margin = 20 * (depth + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom
             holder.mText.setLayoutParams(params);
 
-            holder.mText.setText("Dept: "+depth);
+            holder.mText.setText("Dept: " + depth);
         }
 
         @Override
@@ -116,11 +116,11 @@ public class MainActivity extends Activity {
         }
 
 
-
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             // each data item is just a string in this case
-            @InjectView(R.id.test_text) public TextView mText;
+            @InjectView(R.id.test_text)
+            public TextView mText;
 
             public ViewHolder(View layout) {
                 super(layout);
@@ -145,7 +145,7 @@ public class MainActivity extends Activity {
 
             @OnClick(R.id.remove_all_children)
             public void onButton4(View view) {
-                mAdapter.removeAllChildrenForParent(getAdapterPosition());
+                mAdapter.removeAllChildrenForParentPosition(getAdapterPosition());
             }
         }
     }

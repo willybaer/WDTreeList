@@ -22,8 +22,6 @@ public class WDTreeLeaf {
     // Need for the map tree logic
     private final List<WDTreeLeaf> mChildren = new ArrayList<>();
     private final List<WDTreeLeaf> mCollapsedChildren = new ArrayList<>();
-
-    public Object mObject;
     public WDTreeLeaf parent;
 
     // Double linked list logic
@@ -34,6 +32,8 @@ public class WDTreeLeaf {
     public boolean collapsed = false;
     public boolean childrenCollapsed = false;
     public int viewType = 0;
+
+    public Object mObject;
 
     // Basic list information
     private int mDepth = -1;

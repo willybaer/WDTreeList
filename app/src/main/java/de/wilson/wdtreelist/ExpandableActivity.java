@@ -14,7 +14,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.wilson.wdtreelistlibrary.WDTreeExpandableListAdapter;
+import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
 //import de.wilson.wdtreelistlibrary.expandable.MyLinearLayoutManager;
 //import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
 
@@ -66,7 +66,7 @@ public class ExpandableActivity extends Activity {
     }
 
 
-    public class TestAdapter extends WDTreeExpandableListAdapter<TestAdapter.ViewHolder> {
+    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder> {
 
         public TestObject object;
 
@@ -85,7 +85,7 @@ public class ExpandableActivity extends Activity {
         }
 
         @Override
-        public boolean itemIsExpanded(Object parent, int depth) {
+        public boolean itemIsCollapsed(Object parent, int depth) {
             return depth != 1;
         }
 
@@ -146,11 +146,8 @@ public class ExpandableActivity extends Activity {
 
             @OnClick(R.id.collapse_button)
             public void onButton1(View view) {
-                if (!mAdapter.isParentCollapsed(getAdapterPosition())) {
-                    mAdapter.collapseAllChildrenForParentPosition(getAdapterPosition());
-                } else {
-                    mAdapter.expandAllChildrenForParentPosition(getAdapterPosition());
-                }
+                boolean isCollapsed = mAdapter.isParentCollapsed(getAdapterPosition());
+                mAdapter.setCollapsedForAllChildrenAndParentPosition(!isCollapsed, getAdapterPosition());
             }
         }
     }
