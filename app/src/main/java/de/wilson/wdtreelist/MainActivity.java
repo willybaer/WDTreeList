@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import butterknife.ButterKnife;
@@ -77,6 +76,11 @@ public class MainActivity extends Activity {
                 return 1;
             else
                 return ((TestObject)parent).getChildren().size();
+        }
+
+        @Override
+        public boolean itemIsExpanded(Object parent, int depth) {
+            return false;
         }
 
         @Override

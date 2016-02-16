@@ -14,8 +14,7 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
-import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
+import de.wilson.wdtreelistlibrary.WDTreeExpandableListAdapter;
 //import de.wilson.wdtreelistlibrary.expandable.MyLinearLayoutManager;
 //import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
 
@@ -67,7 +66,7 @@ public class ExpandableActivity extends Activity {
     }
 
 
-    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder> {
+    public class TestAdapter extends WDTreeExpandableListAdapter<TestAdapter.ViewHolder> {
 
         public TestObject object;
 
@@ -83,6 +82,11 @@ public class ExpandableActivity extends Activity {
                 return 1;
             else
                 return ((TestObject) parent).getChildren().size();
+        }
+
+        @Override
+        public boolean itemIsExpanded(Object parent, int depth) {
+            return true;
         }
 
         @Override
@@ -110,12 +114,7 @@ public class ExpandableActivity extends Activity {
             holder.mText.setLayoutParams(params);
             holder.mText.setText("Dept: " + depth);
 
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    holder.collapse();
-                }
-            });
+
             /*if(depth <= 1)
                 holder.setExpanded(true);
             else
@@ -127,40 +126,31 @@ public class ExpandableActivity extends Activity {
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView = LayoutInflater.
                     from(parent.getContext()).
-                    inflate(R.layout.fragment_test_item, parent, false);
-            return new ViewHolder(itemView, false);
+                    inflate(R.layout.fragment_text_item_two, parent, false);
+            return new ViewHolder(itemView);
         }
 
 
-        public class ViewHolder extends WDExpandableViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
 
             // each data item is just a string in this case
             @InjectView(R.id.test_text)
             public TextView mText;
 
-            public ViewHolder(View layout, boolean isExpandable) {
-                super(layout, true);
+            public Object leaf;
+
+            public ViewHolder(View layout) {
+                super(layout);
                 ButterKnife.inject(this, layout);
             }
 
-            @OnClick(R.id.add_children_last_position)
+            @OnClick(R.id.collapse_button)
             public void onButton1(View view) {
-                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newLastChild"));
-            }
-
-            @OnClick(R.id.add_children_before_children)
-            public void onButton2(View view) {
-                mAdapter.addChildAfterChildPosition(getAdapterPosition(), new TestObject("newChildAfterChild: " + mText));
-            }
-
-            @OnClick(R.id.remove_children)
-            public void onButton3(View view) {
-                mAdapter.removeChildForPosition(getAdapterPosition());
-            }
-
-            @OnClick(R.id.remove_all_children)
-            public void onButton4(View view) {
-                mAdapter.removeAllChildrenForParent(getAdapterPosition());
+                if (!mAdapter.isParentCollapsed(getAdapterPosition())) {
+                    mAdapter.collapseAllChildrenForParentPosition(getAdapterPosition());
+                } else {
+                    mAdapter.expandAllChildrenForParentPosition(getAdapterPosition());
+                }
             }
         }
     }

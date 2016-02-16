@@ -7,25 +7,22 @@ import java.util.List;
  * Created by Wilhelm Dewald on 29/04/15.
  * <p/>
  * Stay cool, stay calm.
- *
+ * <p/>
  * This object represents our tree leaf.
- *
+ * <p/>
  * For a better interaction with the recycler list adapter we
  * implement the basic logic of a doubly linked list data structure and
  * the map tree logic
- *
+ * <p/>
  * Have a look on the following wikipedia article for more informations
  * http://en.wikipedia.org/wiki/Linked_list
- *
  */
-public class WDTreeLeaf{
-
-    // Basic list information
-    private int mDepth = -1;
-    private int mPosition = -1;
+public class WDTreeLeaf {
 
     // Need for the map tree logic
     private final List<WDTreeLeaf> mChildren = new ArrayList<>();
+    private final List<WDTreeLeaf> mCollapsedChildren = new ArrayList<>();
+
     public Object mObject;
     public WDTreeLeaf parent;
 
@@ -34,8 +31,12 @@ public class WDTreeLeaf{
     public WDTreeLeaf next;
 
     // Other stuff
-    public boolean visible = false;
+    public boolean collapsed = false;
     public int viewType = 0;
+
+    // Basic list information
+    private int mDepth = -1;
+    private int mPosition = -1;
 
     /*
      * Getter and setter for the main information
@@ -56,9 +57,11 @@ public class WDTreeLeaf{
         this.mPosition = position;
     }
 
-    public List<WDTreeLeaf> getChildren()
-    {
+    public List<WDTreeLeaf> getChildren() {
         return mChildren;
     }
 
+    public List<WDTreeLeaf> getCollapsedChildren() {
+        return mCollapsedChildren;
+    }
 }
