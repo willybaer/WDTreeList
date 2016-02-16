@@ -86,7 +86,7 @@ public class ExpandableActivity extends Activity {
 
         @Override
         public boolean itemIsExpanded(Object parent, int depth) {
-            return true;
+            return depth != 1;
         }
 
         @Override

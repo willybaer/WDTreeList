@@ -19,7 +19,7 @@ public abstract class WDTreeExpandableListAdapter<V extends RecyclerView.ViewHol
         if (parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
-        return parent.collapsed;
+        return parent.childrenCollapsed;
     }
 
     /**
@@ -44,7 +44,7 @@ public abstract class WDTreeExpandableListAdapter<V extends RecyclerView.ViewHol
         // Update the position
         updatePositionAscending(parent);
 
-        parent.collapsed = true;
+        parent.childrenCollapsed = true;
     }
 
     /**
@@ -65,7 +65,7 @@ public abstract class WDTreeExpandableListAdapter<V extends RecyclerView.ViewHol
 
         // animate inserted items
         notifyItemRangeInserted(parentPosition + 1, mCount - currentCount);
-        parent.collapsed = false;
+        parent.childrenCollapsed = false;
     }
 
     private void reAddChildrenForParent(WDTreeLeaf parent, List<WDTreeLeaf> children) {
