@@ -23,5 +23,29 @@
         android:layout_centerVertical="true"
         android:text="1"/>
 
+    <Button
+        android:id="@+id/add_children_before_children"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="2"/>
+
+    <Button
+        android:id="@+id/remove_children"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="3"/>
+
+    <Button
+        android:id="@+id/remove_all_children"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="4"/>
+
 
 </LinearLayout>

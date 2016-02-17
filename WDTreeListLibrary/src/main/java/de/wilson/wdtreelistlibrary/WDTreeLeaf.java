@@ -29,20 +29,17 @@ public class WDTreeLeaf {
     public WDTreeLeaf next;
 
     // Other stuff
-    public boolean collapsed = false;
-    public boolean childrenCollapsed = false;
     public int viewType = 0;
-
     public Object mObject;
 
     // Basic list information
     private int mDepth = -1;
     private int mPosition = -1;
+    private boolean mChildrenCollapsed = false;
 
     public WDTreeLeaf(WDTreeLeaf parent, Object newObject) {
         if (parent != null) {
             this.mDepth = parent.getDepth() + 1;
-            this.collapsed = parent.childrenCollapsed;
         }
         this.parent = parent;
         this.mObject = newObject;
@@ -73,5 +70,13 @@ public class WDTreeLeaf {
 
     public List<WDTreeLeaf> getCollapsedChildren() {
         return mCollapsedChildren;
+    }
+
+    public boolean isChildrenCollapsed() {
+        return mChildrenCollapsed;
+    }
+
+    public void setChildrenCollapsed(boolean childrenCollapsed) {
+        mChildrenCollapsed = childrenCollapsed;
     }
 }

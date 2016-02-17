@@ -149,6 +149,21 @@ public class ExpandableActivity extends Activity {
                 boolean isCollapsed = mAdapter.isParentCollapsed(getAdapterPosition());
                 mAdapter.setCollapsedForAllChildrenAndParentPosition(!isCollapsed, getAdapterPosition());
             }
+
+            @OnClick(R.id.add_children_before_children)
+            public void onButton2(View view) {
+                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newLastChild"));
+            }
+
+            @OnClick(R.id.remove_children)
+            public void onButton3(View view) {
+                mAdapter.removeChildForPosition(getAdapterPosition());
+            }
+
+            @OnClick(R.id.remove_all_children)
+            public void onButton4(View view) {
+                mAdapter.removeAllChildrenForParentPosition(getAdapterPosition());
+            }
         }
     }
 
