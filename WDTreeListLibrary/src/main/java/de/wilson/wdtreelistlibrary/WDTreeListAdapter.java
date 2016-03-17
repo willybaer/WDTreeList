@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import java.util.List;
 
 import de.wilson.wdtreelistlibrary.exception.WDException;
+import de.wilson.wdtreelistlibrary.helper.WDListPositionWithRange;
 
 /**
  * Created by Wilhelm Dewald on 09/03/15.
@@ -19,14 +20,14 @@ import de.wilson.wdtreelistlibrary.exception.WDException;
  * So each element has on the one side a relation to its parent leaf and a relation to its previous
  * and its next leaf.
  * <p/>
- * We depict the RecyclerView.Adapter interface to our own interface implenentation.
+ * We depict the RecyclerView.Adapter interface to our own interface implementation.
  */
 public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<V> implements WDTreeListAdapterStructure {
 
-    protected WDTreeLeaf tree = new WDTreeLeaf(null, null);
+    protected WDTreeLeaf tree = new WDTreeLeaf(null);
     protected int mCount = 0;
-    private boolean mInvalidates = true;
+    protected boolean mInvalidates = true;
 
     /**
      * Helper function to manage our own data reload
@@ -40,20 +41,18 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         this.notifyDataSetChanged();
     }
 
-    /**
+    /*
      * Here is where the magic starts. At this point the standard RecyclerView.Adapter behaviour starts
      * creating the list structure and at this point our adapter start to create the tree/list structure
-     *
-     * @return
      */
     @Override
     public int getItemCount() {
         if (mInvalidates) {
             mInvalidates = false;
             synchronized (tree) {
-                tree = new WDTreeLeaf(null, null);
+                tree = new WDTreeLeaf(null);
                 mCount = 0;
-                generateStructure(null, 0, tree.getChildren());
+                generateStructure(null, 0);
             }
         }
 
@@ -81,7 +80,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
     }
 
     /**
-     * New custom interface functions
+     * New custom abstract functions will replace the default recyclerview functions
      */
     public abstract int getItemCount(Object parent, int depth);
 
@@ -93,31 +92,28 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
     public abstract void onBindViewHolder(V holder, Object leaf, int depth);
 
-    /**
+    /*
      * In this method we check how much children a parent leaf has.
      * And here we will count the amount of all existing leaf, because we need the amount
      * of leafs for recycler view adapter. We also generate the parent/children and list structure by
      * using our abstract functions.
-     *
-     * @param parent
-     * @param depth
-     * @param parentChildren
      */
-    protected void generateStructure(WDTreeLeaf parent, int depth, List<WDTreeLeaf> parentChildren) {
+    protected void generateStructure(WDTreeLeaf parent, int depth) {
         WDTreeLeaf currentParent = parent == null ? this.tree : parent; // We need the current leaf for each position
         currentParent.setPosition(mCount - 1); // Setup the position for each leaf
 
+        // Asking for children count
         int count = getItemCount(currentParent.mObject, currentParent.getDepth()); // calling the new itemCount function with the subtree depth
         if (count < 1)
             return;
 
-        if (!currentParent.isChildrenCollapsed()) {
+        // Asking for collapsed state
+        if (!currentParent.isChildrenCollapsed() && currentParent != tree) {
             boolean parentIsCollapsed = itemIsCollapsed(currentParent, currentParent.getDepth());
             currentParent.setChildrenCollapsed(parentIsCollapsed);
         }
 
         // Subtree structure
-        WDTreeLeaf previousLeaf = null;
         for (int i = 0; i < count; i++) {
 
             // Getting the children for the index
@@ -125,62 +121,65 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
             if (newObject == null)
                 throw new WDException(WDException.WDExceptionType.ITEM_OBJECT_CALLBACK_NULL_OBJECT);
 
-            // Parent <-> Child relationship
-            WDTreeLeaf leaf = new WDTreeLeaf(currentParent, newObject);
-            leaf.setDepth(depth);
-            leaf.setChildrenCollapsed(currentParent.isChildrenCollapsed());
+            // Create new leaf entry
+            WDTreeLeaf newLeaf = new WDTreeLeaf(newObject);
+            newLeaf.parent = currentParent;
+            newLeaf.setDepth(depth);
+            newLeaf.setChildrenCollapsed(currentParent.isChildrenCollapsed());
 
-            if (currentParent.isChildrenCollapsed() && currentParent != tree) {
-                currentParent.getCollapsedChildren().add(leaf);
-            } else {
-                // Prev <-> next relationship only if expanded
-                parentChildren.add(leaf);
-                mCount++;
+            // Setup relations
+            addChildToParentAndSetUpRelations(currentParent, newLeaf);
 
-                if (i == 0) {
-                    leaf.next = currentParent.next;
-                    currentParent.next = leaf;
-                    leaf.prev = currentParent;
-                } else {
-                    leaf.next = previousLeaf.next;
-                    previousLeaf.next = leaf;
-                    leaf.prev = previousLeaf;
-                }
-            }
-            previousLeaf = leaf;
-
-            // We need the information about the previous leaf for setting up the correct list relation
-            generateStructure(leaf, depth + 1, leaf.getChildren());
+            // Go on with the subtree
+            generateStructure(newLeaf, depth + 1);
         }
-
     }
 
+    /**
+     * Helper function to add a root Child
+     *
+     * @param newObject
+     */
     public void addRootChild(Object newObject) {
         addChildForParentPosition(-1, newObject);
     }
 
+    /**
+     * Helper function to add a child to a parent object for a given parent position.
+     * Child gets pushed to the end of the list
+     *
+     * @param parentPosition
+     * @param newObject
+     */
     public void addChildForParentPosition(int parentPosition, Object newObject) {
         WDTreeLeaf parent = getItemForPosition(parentPosition);
         if (parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
-        WDTreeLeaf newItem = new WDTreeLeaf(parent, newObject);
-        setUpChildRelationsForParent(parent, newItem);
+        // Create new Item
+        WDTreeLeaf newItem = new WDTreeLeaf(newObject);
+        newItem.parent = parent;
+        newItem.setDepth(parent.getDepth() + 1);
 
+        // Setup relations
+        addChildToParentAndSetUpRelations(parent, newItem);
+
+        // Update list items position need for the recycler view
         updatePositionAscending(parent);
 
-        // animate item
+        // Animate item
         notifyItemInserted(parent, newItem.getPosition());
     }
 
-    private void notifyItemInserted(WDTreeLeaf parent, int childPosition) {
-        if (!parent.isChildrenCollapsed())
-            notifyItemInserted(childPosition);
-    }
-
+    /**
+     * Helper function to add a child after a given child position;
+     * Must be on the same depth and should append after the child inside the
+     * Child gets pushed to the end of the list
+     *
+     * @param childPosition
+     * @param newObject
+     */
     public void addChildAfterChildPosition(int childPosition, Object newObject) {
-
-        // First of all we need the parent tree leaf
         WDTreeLeaf leafForPosition = getItemForPosition(childPosition);
 
         if (leafForPosition == null || leafForPosition.parent == null)
@@ -190,62 +189,79 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         WDTreeLeaf parent = leafForPosition.parent; // Needs to be the same parent like the leaf at the given position
 
         // Setup new item
-        WDTreeLeaf newItem = new WDTreeLeaf(parent, newObject);
+        WDTreeLeaf newItem = new WDTreeLeaf(newObject);
+        newItem.parent = parent;
 
-        // setup new item relations
-        newItem.next = lastChildLeaf.next;
-        newItem.prev = lastChildLeaf;
+        // Setup new item relations
+        if (!parent.isChildrenCollapsed()) {
+            newItem.next = lastChildLeaf.next;
+            newItem.prev = lastChildLeaf;
 
-        newItem.setPosition(lastChildLeaf.getPosition() + 1);
-        newItem.setDepth(leafForPosition.getDepth()); // Needs to have the same depth like the leaf
+            newItem.setPosition(lastChildLeaf.getPosition() + 1);
+            newItem.setDepth(leafForPosition.getDepth()); // Needs to have the same depth like the leaf
 
-        // setup relations of the existing items
-        if (lastChildLeaf.next != null)
-            lastChildLeaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
-        lastChildLeaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
+            // Setup relations of the existing items
+            if (lastChildLeaf.next != null)
+                lastChildLeaf.next.prev = newItem; // 1. tell old next item(if exists) to set his prev pointer to the new item
+            lastChildLeaf.next = newItem; // 2. and then tell the current leaf to set its pointer pointer to the new item
+        }
 
-        if (parent.isChildrenCollapsed())
-            parent.getCollapsedChildren().add(newItem);
-        else
-            parent.getChildren().add(newItem);
+        // Append new item to
+        parentAppendNewChildAfterChild(parent, leafForPosition, newItem);
 
-        mCount++;
-
-        // update position
+        // Update positions
         updatePositionAscending(parent);
 
-        // animate item
+        // Animate item
         notifyItemInserted(parent, newItem.getPosition());
     }
 
+    private void parentAppendNewChildAfterChild(WDTreeLeaf parentLeaf, WDTreeLeaf afterChild, WDTreeLeaf newItem) {
+        if (parentLeaf.isChildrenCollapsed()) {
+            int childPosition = parentLeaf.getCollapsedChildren().indexOf(afterChild);
+            parentLeaf.getCollapsedChildren().add(childPosition + 1, newItem);
+        } else {
+            int childPosition = parentLeaf.getChildren().indexOf(afterChild);
+            parentLeaf.getChildren().add(childPosition + 1, newItem);
+            this.mCount++;
+        }
+    }
+
+    /**
+     * Helper function to add a child before a given child position;
+     * Must be on the same depth and should append after the child inside the
+     * Child gets pushed to the end of the list
+     *
+     * @param childPosition
+     * @param newObject
+     */
     public void addChildBeforeChildPosition(int childPosition, Object newObject) {
 
         // First of all we need the parent tree leaf
-        WDTreeLeaf leaf = getItemForPosition(childPosition);
+        WDTreeLeaf leafForPosition = getItemForPosition(childPosition);
 
-        if (leaf == null || leaf.parent == null)
+        if (leafForPosition == null || leafForPosition.parent == null)
             throw new WDException(WDException.WDExceptionType.NO_LEAF_FOR_GIVEN_POSITION);
 
-        WDTreeLeaf parent = leaf.parent;
-        WDTreeLeaf newItem = new WDTreeLeaf(parent, newObject);
+        WDTreeLeaf parent = leafForPosition.parent;
+        WDTreeLeaf newItem = new WDTreeLeaf(newObject);
+        newItem.parent = parent;
+        newItem.setDepth(leafForPosition.getDepth());
 
-        // setup new item relations
-        newItem.next = leaf;
-        newItem.prev = leaf.prev;
+        if (!parent.isChildrenCollapsed()) {
+            // setup new item relations
+            newItem.next = leafForPosition;
+            newItem.prev = leafForPosition.prev;
 
-        newItem.setPosition(leaf.getPosition() - 1); // set new position
-        newItem.setDepth(leaf.getDepth());
+            newItem.setPosition(leafForPosition.getPosition() - 1); // set new position
 
-        // updating the relations of the old items
-        leaf.prev.next = newItem; // 1. tell old prev item to set his next pointer to the new item
-        leaf.prev = newItem; // 2. and then tell the current leaf to set its prev pointer to the new item
+            // updating the relations of the old items
+            leafForPosition.prev.next = newItem; // 1. tell old prev item to set his next pointer to the new item
+            leafForPosition.prev = newItem; // 2. and then tell the current leaf to set its prev pointer to the new item
+        }
 
-        if (parent.isChildrenCollapsed())
-            parent.getCollapsedChildren().add(newItem);
-        else
-            parent.getChildren().add(newItem);
-
-        mCount++;
+        // Append new item to
+        parentAppendNewChildBeforeChild(parent, leafForPosition, newItem);
 
         // update position
         updatePositionAscending(parent);
@@ -254,6 +270,22 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         notifyItemInserted(newItem.getPosition());
     }
 
+    private void parentAppendNewChildBeforeChild(WDTreeLeaf parentLeaf, WDTreeLeaf afterChild, WDTreeLeaf newItem) {
+        if (parentLeaf.isChildrenCollapsed()) {
+            int childPosition = parentLeaf.getCollapsedChildren().indexOf(afterChild);
+            parentLeaf.getCollapsedChildren().add(childPosition, newItem);
+        } else {
+            int childPosition = parentLeaf.getChildren().indexOf(afterChild);
+            parentLeaf.getChildren().add(childPosition, newItem);
+            this.mCount++;
+        }
+    }
+
+    /**
+     * Removes child for a given child position
+     *
+     * @param childPosition
+     */
     public void removeChildForPosition(int childPosition) {
 
         // First of all we need the parent tree leaf
@@ -275,25 +307,33 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if (nextLeaf.next != null)
             nextLeaf.next.prev = prevLeaf; // setting up next leaf prev relation only if there is a next object
 
-        // First, we have to do the animation
-        // animate item + sub item to be removed
-        removeAllChildrenIncParentAnimated(leaf);
+        // We need the range for the list animation
+        WDListPositionWithRange animationRange = getRangeForChildrenIncParent(leaf);
 
         // remove leaf from the parent
         parent.getChildren().remove(leaf);
 
         // update position
         updatePositionAscending(parent);
+
+        // Animate item range removed
+        notifyItemRangeRemoved(animationRange.position, animationRange.range);
     }
 
+    /**
+     * Removes all children for a given paren position
+     */
     public void removeAllChildrenForParentPosition(int parentPosition) {
         WDTreeLeaf parent = getItemForPosition(parentPosition);
 
         if (parent == null || parent.parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
+        // We need the range for the animation
+        WDListPositionWithRange animationRange = getRangeForChildren(parent);
+
+        // Remove relations
         removeAllChildrenRelationsForParent(parent);
-        removeAllChildrenForParentFromListAnimated(parent);
 
         // Remove all children from parent forever
         parent.getChildren().clear();
@@ -301,13 +341,39 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
 
         // Update the position
         updatePositionAscending(parent);
+
+        // Animate item range
+        notifyItemRangeRemoved(animationRange.position, animationRange.range);
     }
 
+    private void removeAllChildrenRelationsForParent(WDTreeLeaf parent) {
+        if (parent.getChildren().size() == 0)
+            return;
+
+        WDTreeLeaf lastChildForParent = lastChildrenForParent(parent);
+        parent.next = lastChildForParent.next;
+
+        if (lastChildForParent.next != null)
+            lastChildForParent.next.prev = parent;
+    }
+
+    /**
+     * Helps to find an related object for a given position
+     *
+     * @param position
+     * @return
+     */
     public Object getObjectForPosition(int position) {
         WDTreeLeaf leaf = getItemForPosition(position);
         return leaf != null ? leaf.mObject : null;
     }
 
+    /**
+     * Helper to ask for the collapsed state
+     *
+     * @param parentPosition
+     * @return
+     */
     public boolean isParentCollapsed(int parentPosition) {
         WDTreeLeaf parent = getItemForPosition(parentPosition);
         if (parent == null)
@@ -316,6 +382,12 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         return parent.isChildrenCollapsed();
     }
 
+    /**
+     * Collapse or expand for a parent position
+     *
+     * @param collapse
+     * @param parentPosition
+     */
     public void setCollapsedForAllChildrenAndParentPosition(boolean collapse, int parentPosition) {
         if (collapse) {
             collapseAllChildrenForParentPosition(parentPosition);
@@ -324,11 +396,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         }
     }
 
-    /**
-     * Collapse all children for a parent position
-     *
-     * @param parentPosition
-     */
     private void collapseAllChildrenForParentPosition(int parentPosition) {
 
         // First of all we need the parent tree leaf
@@ -337,20 +404,35 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if (parent == null || parent.parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
+        // We need the range for the animation
+        WDListPositionWithRange animationRange = getRangeForChildren(parent);
+
+        // Setup relations
         parent.setChildrenCollapsed(true);
         removeAllChildrenRelationsForParent(parent);
-        removeAllChildrenForParentFromListAnimated(parent); // Animates the removal from List
-        manageCollapsedChildrenForParent(parent);
+        copyChildrenToCollapsedList(parent);
 
         // Update the position
         updatePositionAscending(parent);
+
+        // Animate item range
+        notifyItemRangeRemoved(animationRange.position, animationRange.range);
     }
 
-    /**
-     * Expand all children for a parent position
-     *
-     * @param parentPosition
-     */
+    private void copyChildrenToCollapsedList(WDTreeLeaf parent) {
+        if (parent == null || parent.getChildren() == null || parent.getChildren().size() == 0)
+            return;
+
+        // Copy children to new list
+        parent.getCollapsedChildren().clear();
+        parent.getCollapsedChildren().addAll(parent.getChildren());
+        parent.getChildren().clear();
+
+        for (WDTreeLeaf leaf : parent.getCollapsedChildren()) {
+            copyChildrenToCollapsedList(leaf);
+        }
+    }
+
     private void expandAllChildrenForParentPosition(int parentPosition) {
         WDTreeLeaf parent = getItemForPosition(parentPosition);
         if (parent == null)
@@ -371,7 +453,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
             return;
 
         for (WDTreeLeaf leaf : children) {
-            setUpChildRelationsForParent(parent, leaf);
+            addChildToParentAndSetUpRelations(parent, leaf);
             if (!leaf.isChildrenCollapsed())
                 reAddChildrenForParent(leaf, leaf.getCollapsedChildren());
         }
@@ -380,19 +462,17 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
             parent.getCollapsedChildren().clear();
     }
 
-    /**
-     * Helper method for appending new items to a parents item
-     *
-     * @param parent
-     * @param newItem
+    /*
+     * Helper method for appending new items to a parents children
+     * Adds the child to the end of the child list.
      */
-    private void setUpChildRelationsForParent(WDTreeLeaf parent, WDTreeLeaf newItem) {
+    private void addChildToParentAndSetUpRelations(WDTreeLeaf parent, WDTreeLeaf newItem) {
         if (parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
         newItem.parent = parent; // setting up parent object relation
 
-        if (parent.isChildrenCollapsed()) {
+        if (parent.isChildrenCollapsed() && parent != this.tree) {
             if (!parent.getCollapsedChildren().contains(newItem))
                 parent.getCollapsedChildren().add(newItem);
             return;
@@ -428,32 +508,21 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         }
         if (!parent.getChildren().contains(newItem)) {
             parent.getChildren().add(newItem);
-            mCount++;
+            this.mCount++;
         }
 
     }
 
-    /**
-     * Helper method to remove all children of a parent leaf
-     *
-     * @param parent
+    /*
+     * Helper function for notify item inserted
      */
-    private void removeAllChildrenRelationsForParent(WDTreeLeaf parent) {
-        if (parent.getChildren().size() == 0)
-            return;
-
-        WDTreeLeaf lastChildForParent = lastChildrenForParent(parent);
-        parent.next = lastChildForParent.next;
-
-        if (lastChildForParent.next != null)
-            lastChildForParent.next.prev = parent;
+    private void notifyItemInserted(WDTreeLeaf parent, int childPosition) {
+        if (!parent.isChildrenCollapsed())
+            notifyItemInserted(childPosition);
     }
 
-    /**
+    /*
      * This function return the leaf for a given position.
-     *
-     * @param position
-     * @return
      */
     private WDTreeLeaf getItemForPosition(int position) {
         if (position < -1)
@@ -473,10 +542,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         return null;
     }
 
-    /**
+    /*
      * This functions are re managing the leaf positions after a successful add/remove of a leaf
-     *
-     * @param currentItem
      */
     private void updatePositionAscending(WDTreeLeaf currentItem) {
         if (currentItem.next != null) {
@@ -492,11 +559,8 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         }
     }
 
-    /**
+    /*
      * This function is need to find the last child of the sub tree of a given parent leaf.
-     *
-     * @param parent
-     * @return
      */
     private WDTreeLeaf lastChildrenForParent(WDTreeLeaf parent) {
         if (parent == null)
@@ -508,53 +572,35 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         return lastChildrenForParent(parent.getChildren().get(parent.getChildren().size() - 1));
     }
 
-    /**
-     * Animates item deletion inside the recycler view list:
-     * Here we animate the the deletion of the parent item and including its children
-     *
-     * @param parent
+    /*
+     * Returns the range from the parent position (inc parent position)
+     * until the last child position inside the parents subtree
      */
-    private void removeAllChildrenIncParentAnimated(WDTreeLeaf parent) {
+    private WDListPositionWithRange getRangeForChildrenIncParent(WDTreeLeaf parent) {
         if (parent == null)
-            return;
+            throw new WDException(WDException.WDExceptionType.PARENT_OR_CHILD_LEAF_ARE_NULL);
 
         int parentPosition = parent.getPosition();
         int lastChildPosition = lastChildrenForParent(parent).getPosition();
         int range = lastChildPosition - parentPosition + 1;
-        notifyItemRangeRemoved(parentPosition, range);
+        this.mCount -= range;
 
-        mCount -= range;
+        return new WDListPositionWithRange(parentPosition, range);
     }
 
-    /**
-     * Animates item deletion inside the recycler view list:
-     * Here we animate the the deletion of children
-     *
-     * @param parent
+    /*
+     * Returns the range from the parent position (NOT inc parent position)
+     * until the last child position inside the parents subtree
      */
-    private void removeAllChildrenForParentFromListAnimated(WDTreeLeaf parent) {
+    private WDListPositionWithRange getRangeForChildren(WDTreeLeaf parent) {
         if (parent == null)
-            return;
+            throw new WDException(WDException.WDExceptionType.PARENT_OR_CHILD_LEAF_ARE_NULL);
 
         int parentPosition = parent.getPosition();
         int lastChildPosition = lastChildrenForParent(parent).getPosition();
         int range = lastChildPosition - parentPosition;
-        notifyItemRangeRemoved(parentPosition + 1, range);
+        this.mCount -= range;
 
-        mCount -= range;
-    }
-
-    private void manageCollapsedChildrenForParent(WDTreeLeaf parent) {
-        if (parent == null || parent.getChildren() == null || parent.getChildren().size() == 0)
-            return;
-
-        // Copy children to new list
-        parent.getCollapsedChildren().clear();
-        parent.getCollapsedChildren().addAll(parent.getChildren());
-        parent.getChildren().clear();
-
-        for (WDTreeLeaf leaf : parent.getCollapsedChildren()) {
-            manageCollapsedChildrenForParent(leaf);
-        }
+        return new WDListPositionWithRange(parentPosition + 1, range);
     }
 }

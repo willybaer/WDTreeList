@@ -37,11 +37,7 @@ public class WDTreeLeaf {
     private int mPosition = -1;
     private boolean mChildrenCollapsed = false;
 
-    public WDTreeLeaf(WDTreeLeaf parent, Object newObject) {
-        if (parent != null) {
-            this.mDepth = parent.getDepth() + 1;
-        }
-        this.parent = parent;
+    public WDTreeLeaf(Object newObject) {
         this.mObject = newObject;
     }
 

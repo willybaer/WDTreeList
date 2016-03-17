@@ -25,11 +25,10 @@ import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
  */
 public class ExpandableActivity extends Activity {
 
+    public TestAdapter mAdapter;
     @InjectView(R.id.list_view)
     RecyclerView mList;
-
     TestObject testObject;
-    private TestAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +85,7 @@ public class ExpandableActivity extends Activity {
 
         @Override
         public boolean itemIsCollapsed(Object parent, int depth) {
-            return depth != 1;
+            return false;
         }
 
         @Override
@@ -152,18 +151,25 @@ public class ExpandableActivity extends Activity {
 
             @OnClick(R.id.add_children_before_children)
             public void onButton2(View view) {
+                mAdapter.addChildAfterChildPosition(getAdapterPosition(), new TestObject("newLastChild"));
+            }
+
+            @OnClick(R.id.add_children)
+            public void onButton3(View view) {
                 mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newLastChild"));
             }
 
             @OnClick(R.id.remove_children)
-            public void onButton3(View view) {
+            public void onButton4(View view) {
                 mAdapter.removeChildForPosition(getAdapterPosition());
             }
 
             @OnClick(R.id.remove_all_children)
-            public void onButton4(View view) {
+            public void onButton5(View view) {
                 mAdapter.removeAllChildrenForParentPosition(getAdapterPosition());
             }
+
+
         }
     }
 
