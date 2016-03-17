@@ -40,6 +40,8 @@ public class ExpandableActivityTest {
         testRootChildFunction();
         testExpandCollapse();
         testAddRemoveItem();
+        testAddChildAfterAndBeforeChild();
+        testExpandCollapseWithAddedingNewItems();
     }
 
     private void testRootChildFunction() {
@@ -126,6 +128,92 @@ public class ExpandableActivityTest {
         }
         onView(withRecyclerView(R.id.list_view)
                 .atPositionOnView(2, R.id.test_text)).check(matches(withText("Dept: 1")));
+    }
+
+    private void testAddChildAfterAndBeforeChild() {
+        // Test 1: testing add item after child
+        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mExpandableActivity.getActivity().mAdapter.addChildAfterChildPosition(3, null);
+            }
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withRecyclerView(R.id.list_view)
+                .atPositionOnView(5, R.id.test_text)).check(matches(withText("Dept: 2")));
+
+        // Test 2: testing add item before child
+        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mExpandableActivity.getActivity().mAdapter.addChildBeforeChildPosition(3, null);
+            }
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withRecyclerView(R.id.list_view)
+                .atPositionOnView(3, R.id.test_text)).check(matches(withText("Dept: 2")));
+
+
+    }
+
+    private void testExpandCollapseWithAddedingNewItems() {
+        // Test 1: testing collapse -> should collapse two items
+        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(true, 2);
+            }
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withRecyclerView(R.id.list_view)
+                .atPositionOnView(3, R.id.test_text)).check(matches(withText("Dept: 1")));
+
+        // Test 2: Add new Item
+        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mExpandableActivity.getActivity().mAdapter.addChildForParentPosition(2, null);
+            }
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withRecyclerView(R.id.list_view)
+                .atPositionOnView(3, R.id.test_text)).check(matches(withText("Dept: 1")));
+
+        // Test 3: Testing expand
+        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(false, 2);
+            }
+        });
+
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        onView(withRecyclerView(R.id.list_view)
+                .atPositionOnView(7, R.id.test_text)).check(matches(withText("Dept: 2")));
     }
 
 

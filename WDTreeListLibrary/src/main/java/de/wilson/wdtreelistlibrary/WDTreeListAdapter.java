@@ -168,7 +168,9 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         updatePositionAscending(parent);
 
         // Animate item
-        notifyItemInserted(parent, newItem.getPosition());
+        if (!parent.isChildrenCollapsed()) {
+            notifyItemInserted(parent, newItem.getPosition());
+        }
     }
 
     /**
@@ -213,7 +215,9 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         updatePositionAscending(parent);
 
         // Animate item
-        notifyItemInserted(parent, newItem.getPosition());
+        if (!parent.isChildrenCollapsed()) {
+            notifyItemInserted(parent, newItem.getPosition());
+        }
     }
 
     private void parentAppendNewChildAfterChild(WDTreeLeaf parentLeaf, WDTreeLeaf afterChild, WDTreeLeaf newItem) {
@@ -267,7 +271,9 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         updatePositionAscending(parent);
 
         // animate item
-        notifyItemInserted(newItem.getPosition());
+        if (!parent.isChildrenCollapsed()) {
+            notifyItemInserted(parent, newItem.getPosition());
+        }
     }
 
     private void parentAppendNewChildBeforeChild(WDTreeLeaf parentLeaf, WDTreeLeaf afterChild, WDTreeLeaf newItem) {
@@ -329,21 +335,25 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder>
         if (parent == null || parent.parent == null)
             throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
 
-        // We need the range for the animation
-        WDListPositionWithRange animationRange = getRangeForChildren(parent);
+        if (parent.getChildren().size() > 0) {
+            // We need the range for the animation
+            WDListPositionWithRange animationRange = getRangeForChildren(parent);
 
-        // Remove relations
-        removeAllChildrenRelationsForParent(parent);
+            // Remove relations
+            removeAllChildrenRelationsForParent(parent);
 
-        // Remove all children from parent forever
-        parent.getChildren().clear();
+            // Remove all children from parent forever
+            parent.getChildren().clear();
+
+            // Update the position
+            updatePositionAscending(parent);
+
+            // Animate item range
+            notifyItemRangeRemoved(animationRange.position, animationRange.range);
+        }
+
+        // Remove collapsed children
         parent.getCollapsedChildren().clear();
-
-        // Update the position
-        updatePositionAscending(parent);
-
-        // Animate item range
-        notifyItemRangeRemoved(animationRange.position, animationRange.range);
     }
 
     private void removeAllChildrenRelationsForParent(WDTreeLeaf parent) {
