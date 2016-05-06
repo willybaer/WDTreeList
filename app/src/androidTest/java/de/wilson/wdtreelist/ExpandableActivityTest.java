@@ -67,7 +67,7 @@ public class ExpandableActivityTest {
         mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(true, 2);
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(2, true);
             }
         });
 
@@ -83,7 +83,7 @@ public class ExpandableActivityTest {
         mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(false, 2);
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(2, false);
             }
         });
 
@@ -171,7 +171,7 @@ public class ExpandableActivityTest {
         mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(true, 2);
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(2, true);
             }
         });
 
@@ -203,7 +203,7 @@ public class ExpandableActivityTest {
         mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(false, 2);
+                mExpandableActivity.getActivity().mAdapter.setCollapsedForAllChildrenAndParentPosition(2, false);
             }
         });
 

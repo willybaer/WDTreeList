@@ -11,24 +11,58 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import de.wilson.wdtreelistlibrary.WDTreeListAdapter;
-//import de.wilson.wdtreelistlibrary.expandable.MyLinearLayoutManager;
-//import de.wilson.wdtreelistlibrary.expandable.WDExpandableViewHolder;
 
 /**
- * Created by Wilhelm Dewald on 27/07/15.
- * <p/>
- * Stay cool, stay calm.
+ * Created by Wilhelm Dewald on 18/03/16.
  */
-public class ExpandableActivity extends Activity {
+public class JsonActivity extends Activity {
 
     public TestAdapter mAdapter;
     @InjectView(R.id.list_view)
     RecyclerView mList;
+
     TestObject testObject;
+
+    private String json = "{\n" +
+            "  \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n" +
+            "\n" +
+            "  \"definitions\": {\n" +
+            "    \"address\": {\n" +
+            "      \"type\": \"object\",\n" +
+            "      \"properties\": {\n" +
+            "        \"street_address\": { \"type\": \"string\" },\n" +
+            "        \"city\":           { \"type\": \"string\" },\n" +
+            "        \"state\":          { \"type\": \"string\" }\n" +
+            "      },\n" +
+            "      \"required\": [\"street_address\", \"city\", \"state\"]\n" +
+            "    }\n" +
+            "  },\n" +
+            "\n" +
+            "  \"type\": \"object\",\n" +
+            "\n" +
+            "  \"properties\": {\n" +
+            "    \"billing_address\": { \"$ref\": \"#/definitions/address\" },\n" +
+            "    \"shipping_address\": {\n" +
+            "      \"allOf\": [\n" +
+            "        { \"$ref\": \"#/definitions/address\" },\n" +
+            "        { \"properties\":\n" +
+            "          { \"type\": { \"enum\": [ \"residential\", \"business\" ] } },\n" +
+            "          \"required\": [\"type\"]\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  }\n" +
+            "}\n";
+
+    private JSONObject mJSONObject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,74 +70,61 @@ public class ExpandableActivity extends Activity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+        try {
+            mJSONObject = (JSONObject) new JSONTokener(json).nextValue();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         mList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        testObject = new TestObject("root");
 
-        // Three Children
-        TestObject child1 = new TestObject("child1");
 
-        TestObject child2 = new TestObject("child2");
-        // two children
-        TestObject child21 = new TestObject("child21");
-        TestObject child22 = new TestObject("child22");
-        child2.getChildren().add(child21);
-        child2.getChildren().add(child22);
-        TestObject child3 = new TestObject("child3");
-        // two children
-        TestObject child31 = new TestObject("child31");
-        TestObject child32 = new TestObject("child32");
-        child3.getChildren().add(child31);
-        child3.getChildren().add(child32);
-        testObject.getChildren().add(child1);
-        testObject.getChildren().add(child2);
-        testObject.getChildren().add(child3);
-
-        mAdapter = new TestAdapter(testObject);
+        mAdapter = new TestAdapter(mJSONObject);
         mList.setAdapter(mAdapter);
         mList.setItemAnimator(new DefaultItemAnimator());
 
     }
 
 
-    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder, Object> {
+    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder, JSONObject> {
 
-        public TestObject object;
+        public JSONObject object;
 
         // Provide a suitable constructor (depends on the kind of data set)
-        public TestAdapter(TestObject object) {
+        public TestAdapter(JSONObject object) {
             this.object = object;
         }
 
 
         @Override
-        public int getItemCount(Object parent, int depth) {
+        public int getItemCount(JSONObject parent, int depth) {
             if (parent == null)
-                return 1;
+                return 0;
             else
-                return ((TestObject) parent).getChildren().size();
+                return 0; //((JSONObject) parent).getChildren().size();
         }
 
         @Override
-        public boolean itemIsCollapsed(Object parent, int depth) {
-            return false;
+        public boolean itemIsCollapsed(JSONObject parent, int depth) {
+            return depth >= 0;
         }
 
         @Override
-        public Object getItemObject(Object parent, int pos, int depth) {
+        public JSONObject getItemObject(JSONObject parent, int pos, int depth) {
             if (parent == null)
                 return object;
             else
-                return ((TestObject) parent).getChildren().get(pos);
+                return null;
 
         }
 
         @Override
-        public int getItemViewType(Object parent, int depth) {
+        public int getItemViewType(JSONObject parent, int depth) {
             return 0;
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, Object leaf, int depth) {
+        public void onBindViewHolder(final ViewHolder holder, JSONObject leaf, int depth) {
 
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();
@@ -150,12 +171,12 @@ public class ExpandableActivity extends Activity {
 
             @OnClick(R.id.add_children_before_children)
             public void onButton2(View view) {
-                mAdapter.addChildAfterChildPosition(getAdapterPosition(), new TestObject("newLastChild"));
+                mAdapter.addChildAfterChildPosition(getAdapterPosition(), null);
             }
 
             @OnClick(R.id.add_children)
             public void onButton3(View view) {
-                mAdapter.addChildForParentPosition(getAdapterPosition(), new TestObject("newLastChild"));
+                mAdapter.addChildForParentPosition(getAdapterPosition(), null);
             }
 
             @OnClick(R.id.remove_children)
@@ -174,3 +195,4 @@ public class ExpandableActivity extends Activity {
 
 
 }
+

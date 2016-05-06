@@ -1,4 +1,4 @@
-package de.wilson.wdtreelistlibrary.helper;
+package de.wilson.wdtreelistlibrary.objects;
 
 /**
  * Created by Wilhelm Dewald on 17/03/16.

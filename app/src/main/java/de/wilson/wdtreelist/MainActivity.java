@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     }
 
 
-    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder> {
+    public class TestAdapter extends WDTreeListAdapter<TestAdapter.ViewHolder, Object> {
 
         public TestObject object;
 

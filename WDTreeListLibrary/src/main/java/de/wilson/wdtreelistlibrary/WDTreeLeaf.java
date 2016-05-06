@@ -17,28 +17,28 @@ import java.util.List;
  * Have a look on the following wikipedia article for more informations
  * http://en.wikipedia.org/wiki/Linked_list
  */
-public class WDTreeLeaf {
+public class WDTreeLeaf<T extends Object> {
 
     // Need for the map tree logic
-    private final List<WDTreeLeaf> mChildren = new ArrayList<>();
-    private final List<WDTreeLeaf> mCollapsedChildren = new ArrayList<>();
-    public WDTreeLeaf parent;
+    private final List<WDTreeLeaf<T>> mChildren = new ArrayList<>();
+    private final List<WDTreeLeaf<T>> mCollapsedChildren = new ArrayList<>();
+    public WDTreeLeaf<T> parent;
 
     // Double linked list logic
-    public WDTreeLeaf prev;
-    public WDTreeLeaf next;
+    public WDTreeLeaf<T> prev;
+    public WDTreeLeaf<T> next;
 
     // Other stuff
     public int viewType = 0;
-    public Object mObject;
+    public T object;
 
     // Basic list information
     private int mDepth = -1;
     private int mPosition = -1;
     private boolean mChildrenCollapsed = false;
 
-    public WDTreeLeaf(Object newObject) {
-        this.mObject = newObject;
+    public WDTreeLeaf(T newObject) {
+        this.object = newObject;
     }
 
     /*
@@ -60,11 +60,11 @@ public class WDTreeLeaf {
         this.mPosition = position;
     }
 
-    public List<WDTreeLeaf> getChildren() {
+    public List<WDTreeLeaf<T>> getChildren() {
         return mChildren;
     }
 
-    public List<WDTreeLeaf> getCollapsedChildren() {
+    public List<WDTreeLeaf<T>> getCollapsedChildren() {
         return mCollapsedChildren;
     }
 

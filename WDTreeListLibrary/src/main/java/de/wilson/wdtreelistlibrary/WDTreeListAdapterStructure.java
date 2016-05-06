@@ -3,7 +3,7 @@ package de.wilson.wdtreelistlibrary;
 /**
  * Created by Wilhelm Dewald on 16/02/16.
  */
-public interface WDTreeListAdapterStructure {
+public interface WDTreeListAdapterStructure<T> {
 
     /**
      * Helper function to manage our own data reload
@@ -15,7 +15,7 @@ public interface WDTreeListAdapterStructure {
      *
      * @param newObject
      */
-    void addRootChild(Object newObject);
+    void addRootChild(T newObject);
 
     /**
      * Function for appending new child to the parents child list.
@@ -24,16 +24,16 @@ public interface WDTreeListAdapterStructure {
      * @param parentPosition
      * @param newObject
      */
-    void addChildForParentPosition(int parentPosition, Object newObject);
+    void addChildForParentPosition(int parentPosition, T newObject);
 
     /**
      * Function for appending new object at the same depth like the current leafs position and
-     * the one position after the childs position.
+     * the one position after the child position.
      *
      * @param childPosition
      * @param newObject
      */
-    void addChildAfterChildPosition(int childPosition, Object newObject);
+    void addChildAfterChildPosition(int childPosition, T newObject);
 
     /**
      * Function for appending new object at the same depth like the current leafs
@@ -42,7 +42,7 @@ public interface WDTreeListAdapterStructure {
      * @param childPosition
      * @param newObject
      */
-    void addChildBeforeChildPosition(int childPosition, Object newObject);
+    void addChildBeforeChildPosition(int childPosition, T newObject);
 
     /**
      * Removes all children for a parent position
@@ -64,14 +64,21 @@ public interface WDTreeListAdapterStructure {
      * @param position
      * @return
      */
-    Object getObjectForPosition(int position);
+    T getObjectForPosition(int position);
 
     /**
      * Toggle the collapsing and the expanding of a parent leaf
      *
      * @param parentPosition
      */
-    void setCollapsedForAllChildrenAndParentPosition(boolean collapse, int parentPosition);
+    void setCollapsedForAllChildrenAndParentPosition(int parentPosition, boolean collapse);
 
+
+    /**
+     * Return the the leaf state if it is collapes or not
+     *
+     * @param parentPosition
+     * @return
+     */
     boolean isParentCollapsed(int parentPosition);
 }
