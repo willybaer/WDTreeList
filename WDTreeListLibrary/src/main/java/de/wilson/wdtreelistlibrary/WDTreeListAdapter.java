@@ -23,7 +23,7 @@ import de.wilson.wdtreelistlibrary.objects.WDListPositionWithRange;
  * <p/>
  * We depict the RecyclerView.Adapter interface to our own interface implementation.
  * <p/>
- * Version 0.5
+ * Version 0.1.6
  * -----------
  * <p/>
  * It is now possible to expand and collapse tree leafs. There is a additional function for this
@@ -36,7 +36,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
     protected int mCount = 0;
     protected boolean mInvalidates = true;
 
-    /**
+    /*
      * New custom abstract functions will replace the default recycler view functions
      */
     public abstract int getItemCount(T parent, int depth);

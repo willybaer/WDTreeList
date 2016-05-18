@@ -1,43 +1,47 @@
 # Android Tree List Adapter
 -----
 ### About
-This library spports a tree list implementation for a RecyclerView. Inspired by the NSOUtlineView ( AppKit Framework ), this library is based on the RecyclerView.Adapter.
+This library supports a tree list implementation for a RecyclerView. Inspired by the NSOUtlineView ( AppKit Framework ), this library is based on the RecyclerView.Adapter.
 
 ### Version
-0.1.5
+0.1.6
 
 ### Gradle
 ```Java
-compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.5'
+compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.6'
 ```
 
 ### Example
-Have a look inside the "app" directory for an example implemenation.
+Have a look inside the "app" directory for an example implementation.
 
 ------
 ### How To
-The usage of the WDTreeListAdapter is similiar to the standard RecyclerView.Adapter. Only extend the WDTreeListAdapter and implement the necessary methods.
+The usage of the WDTreeListAdapter is similar to the standard RecyclerView.Adapter. Extend the WDTreeListAdapter and implement the necessary methods.
 
-##### int getItemCount(Object parent, int depth)
+It is now possible to expand and collapse tree leafs. For this there are 
+##### int getItemCount(T parent, int depth)
 Here you have to return the number of children for the given parent object. To specify the root item in any of these methods, nil is sent as the method`s parent object.
 
-##### Object getItemObject(Object parent, int pos, int depth)
+##### Object getItemObject(T parent, int pos, int depth)
 Return the related object for the given child position and its parent object.
 
-##### int getItemViewType(Object parent, int depth)
+##### int getItemViewType(T parent, int depth)
 Return the viewType for the children of the given parent object.
 
 ##### void onBindViewHolder(V holder, Object leaf, int depth)
 Setup the content of the ViewHolder.
 
+##### boolean itemIsCollapsed(T parent, int depth)
+Return true if the item should be collapsed when initialising the tree list.
+
 ------
 ### Helper functions
 #### Append new entry
 ```Java
-public void addRootChild(Object newObject)
-public void addChildForParentPosition(int parentPosition, Object newObject)
-public void addChildAfterChildPosition(int childPosition, Object newObject)
-public void addChildBeforeChildPosition(int childPosition, Object newObject)
+public void addRootChild(T newObject)
+public void addChildForParentPosition(int parentPosition, T newObject)
+public void addChildAfterChildPosition(int childPosition, T newObject)
+public void addChildBeforeChildPosition(int childPosition, T newObject)
 ```
 #### Remove entry
 ```Java
@@ -46,5 +50,10 @@ public  void removeAllChildrenForParent(int parentPosition)
 ```
 #### Search functions
 ```Java
-public Object getObjectForPosition(int position)
+public T getObjectForPosition(int position)
+```
+#### Collaps/Expand functions
+```Java
+public boolean isParentCollapsed(int parentPosition)
+public void setCollapsedForAllChildrenAndParentPosition(int parentPosition, boolean collapse)
 ```
