@@ -14,7 +14,7 @@ compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.6'
 ### Example
 Have a look inside the "app" directory for an example implementation.
 
-[[ https://cloud.githubusercontent.com/assets/3387249/15375126/d16ca114-1d4d-11e6-879e-052f49921fa6.gif | height = 100px ]]
+<img style="-webkit-user-select: none; cursor: zoom-in;" src="https://cloud.githubusercontent.com/assets/3387249/15375126/d16ca114-1d4d-11e6-879e-052f49921fa6.gif" width="315" height="560">
 
 ------
 ### How To
