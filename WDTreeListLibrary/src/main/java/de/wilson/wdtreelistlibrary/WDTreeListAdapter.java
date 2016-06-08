@@ -58,7 +58,6 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
         if (mInvalidates) {
             mInvalidates = false;
             synchronized (tree) {
-                tree = new WDTreeLeaf(null);
                 mCount = 0;
                 generateStructure(null, 0);
             }
@@ -134,7 +133,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
         synchronized (tree) {
             mCount = -1;
             mInvalidates = true;
-            tree = null;
+            tree = new WDTreeLeaf(null);
         }
         this.notifyDataSetChanged();
     }

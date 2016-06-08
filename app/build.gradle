@@ -39,17 +39,17 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:appcompat-v7:23.3.0'
-    compile 'com.android.support:support-v4:23.3.0'
-    compile 'com.android.support:recyclerview-v7:23.3.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:recyclerview-v7:23.4.0'
 
     // Butterknife for view injection
     compile 'com.jakewharton:butterknife:6.1.0'
     compile project(':WDTreeListLibrary')
 
     //compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.1'
-    androidTestCompile 'com.android.support:support-annotations:23.3.0'
+    androidTestCompile 'com.android.support:support-annotations:23.4.0'
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile 'com.android.support.test:rules:0.4'
     androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2') {
