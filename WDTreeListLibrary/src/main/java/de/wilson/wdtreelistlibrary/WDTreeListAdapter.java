@@ -23,7 +23,7 @@ import de.wilson.wdtreelistlibrary.objects.WDListPositionWithRange;
  * <p/>
  * We depict the RecyclerView.Adapter interface to our own interface implementation.
  * <p/>
- * Version 0.1.6
+ * Version 0.1.8
  * -----------
  * <p/>
  * It is now possible to expand and collapse tree leafs. There is a additional function for this
@@ -41,13 +41,13 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
      */
     public abstract int getItemCount(T parent, int depth);
 
-    public abstract boolean itemIsCollapsed(T parent, int depth);
+    public abstract boolean itemIsCollapsed(T leaf, int depth);
 
     public abstract T getItemObject(T parent, int pos, int depth);
 
-    public abstract int getItemViewType(T parent, int depth);
+    public abstract int getItemViewType(T leaf, int depth);
 
-    public abstract void onBindViewHolder(V holder, T leaf, int depth);
+    public abstract void onBindViewHolder(V holder, T parent, T leaf, int depth);
 
     /*
      * Here is where the magic starts. At this point the standard RecyclerView.Adapter behaviour starts
@@ -82,7 +82,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
     @Override
     public void onBindViewHolder(V holder, int position) {
         WDTreeLeaf<T> item = getItemForPosition(position);
-        onBindViewHolder(holder, item.object, item.getDepth());
+        onBindViewHolder(holder, item.parent, item.object, item.getDepth());
     }
 
     /*
