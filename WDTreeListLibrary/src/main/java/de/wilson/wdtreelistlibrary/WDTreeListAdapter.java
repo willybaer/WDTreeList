@@ -82,7 +82,7 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
     @Override
     public void onBindViewHolder(V holder, int position) {
         WDTreeLeaf<T> item = getItemForPosition(position);
-        onBindViewHolder(holder, item.parent, item.object, item.getDepth());
+        onBindViewHolder(holder, item.parent.object, item.object, item.getDepth());
     }
 
     /*

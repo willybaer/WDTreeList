@@ -98,7 +98,7 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, Object leaf, int depth) {
+        public void onBindViewHolder(ViewHolder holder, Object parent, Object leaf, int depth) {
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();
             int margin = 20 * (depth + 1);
             params.setMargins(margin, 0, 0, 0); //substitute parameters for left, top, right, bottom

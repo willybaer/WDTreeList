@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+apply plugin: "com.jfrog.bintray"
 
 // https://www.virag.si/2015/01/publishing-gradle-android-library-to-jcenter/
 // https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
 
-version = "0.1.7"
+version = "0.1.8"
 group = "com.github.willybaer.wdtreelist"
 
 def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
@@ -25,6 +25,7 @@ android {
     buildTypes {
     }
 }
+
 
 install {
     repositories.mavenInstaller {
@@ -107,7 +108,7 @@ bintray {
         publish = true
         version {
             name = project.version //Bintray logical version name
-            desc = 'Version 0.1.7: Fixed crash on notificateThatDataChanged and updated android libraries.'
+            desc = 'Version 0.1.8: Modified the "onBindViewHolder" function to be able to access also the parent object inside.'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password")

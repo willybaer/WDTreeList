@@ -124,7 +124,7 @@ public class JsonActivity extends Activity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, JSONObject leaf, int depth) {
+        public void onBindViewHolder(final ViewHolder holder, JSONObject parent, JSONObject leaf, int depth) {
 
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();

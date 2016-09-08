@@ -103,7 +103,7 @@ public class ExpandableActivity extends Activity {
         }
 
         @Override
-        public void onBindViewHolder(final ViewHolder holder, Object leaf, int depth) {
+        public void onBindViewHolder(final ViewHolder holder, Object parent, Object leaf, int depth) {
 
 
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.mText.getLayoutParams();
