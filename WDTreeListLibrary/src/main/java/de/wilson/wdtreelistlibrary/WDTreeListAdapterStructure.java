@@ -67,6 +67,15 @@ public interface WDTreeListAdapterStructure<T> {
     T getObjectForPosition(int position);
 
     /**
+     * Returns the position of the parent object
+     * Returns -1 if the child is the root element
+     *
+     * @param childPosition
+     * @return
+     */
+    int getParentPositionForChildPosition(int childPosition);
+
+    /**
      * Toggle the collapsing and the expanding of a parent leaf
      *
      * @param parentPosition
@@ -81,4 +90,6 @@ public interface WDTreeListAdapterStructure<T> {
      * @return
      */
     boolean isParentCollapsed(int parentPosition);
+
+
 }

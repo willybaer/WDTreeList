@@ -4,13 +4,13 @@
 This library supports a tree list implementation for a RecyclerView. Inspired by the NSOUtlineView ( AppKit Framework ), this library is based on the RecyclerView.Adapter.
 
 ### Version
-0.1.8
+0.2.0
 
 Modified the 'onBindViewHolder' function to be able access the parent object there.
 
 ### Gradle
 ```Java
-compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.1.8'
+compile 'com.github.willybaer.wdtreelist:WDTreeListLibrary:0.2.0'
 ```
 
 ### Example
@@ -55,6 +55,7 @@ public  void removeAllChildrenForParent(int parentPosition)
 #### Search functions
 ```Java
 public T getObjectForPosition(int position)
+public int getParentPositionForChildPosition(int childPosition)
 ```
 #### Collaps/Expand functions
 ```Java

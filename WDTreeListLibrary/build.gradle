@@ -6,7 +6,7 @@ apply plugin: "com.jfrog.bintray"
 // https://github.com/danielemaddaluno/gradle-jcenter-publish
 // Library version
 
-version = "0.1.8"
+version = "0.2.0"
 group = "com.github.willybaer.wdtreelist"
 
 def siteUrl = 'https://github.com/willybaer/WDTreeList'      // Homepage URL of the library
@@ -108,7 +108,7 @@ bintray {
         publish = true
         version {
             name = project.version //Bintray logical version name
-            desc = 'Version 0.1.8: Modified the "onBindViewHolder" function to be able to access also the parent object inside.'
+            desc = 'Version 0.2.0: Added new search function \'getParentPositionForChildPosition\' to be able to access the parent leaf from anywhere.'
             gpg {
                 sign = true //Determines whether to GPG sign the files. The default is false
                 passphrase = properties.getProperty("bintray.gpg.password")

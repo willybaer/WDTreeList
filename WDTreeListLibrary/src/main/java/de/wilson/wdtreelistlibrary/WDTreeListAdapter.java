@@ -340,6 +340,19 @@ public abstract class WDTreeListAdapter<V extends RecyclerView.ViewHolder, T ext
     }
 
     @Override
+    public int getParentPositionForChildPosition(int childPosition) {
+        WDTreeLeaf<T> leaf = getItemForPosition(childPosition);
+
+        if (leaf == null)
+            throw new WDException(WDException.WDExceptionType.NO_LEAF_FOR_GIVEN_POSITION);
+
+        if (leaf.parent == null)
+            throw new WDException(WDException.WDExceptionType.NO_PARENT_LEAF_FOR_GIVEN_POSITION);
+
+        return leaf.parent.getPosition();
+    }
+
+    @Override
     public boolean isParentCollapsed(int parentPosition) {
         WDTreeLeaf<T> parent = getItemForPosition(parentPosition);
         if (parent == null)
