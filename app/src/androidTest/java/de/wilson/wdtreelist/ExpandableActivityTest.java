@@ -12,6 +12,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static de.wilson.wdtreelist.TestUtils.withRecyclerView;
+import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -37,30 +38,19 @@ public class ExpandableActivityTest {
      */
     @Test
     public void testingExpandCollapse() {
-        testRootChildFunction();
+        testParentChildPosition();
         testExpandCollapse();
         testAddRemoveItem();
         testAddChildAfterAndBeforeChild();
-        testExpandCollapseWithAddedingNewItems();
+        testExpandCollapseWithAddingNewItems();
     }
 
-    private void testRootChildFunction() {
-        // Test 1: testing collapse -> should collapse two items
-        mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mExpandableActivity.getActivity().mAdapter.addRootChild(null);
-            }
-        });
-
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        onView(withRecyclerView(R.id.list_view)
-                .atPositionOnView(8, R.id.test_text)).check(matches(withText("Dept: 0")));
+    private void testParentChildPosition() {
+        // Testing: get parent position for child position
+        int parentPosition = mExpandableActivity.getActivity().mAdapter.getParentPositionForChildPosition(0);
+        assertTrue(parentPosition == -1);
     }
+
 
     private void testExpandCollapse() {
         // Test 1: testing collapse -> should collapse two items
@@ -166,7 +156,7 @@ public class ExpandableActivityTest {
 
     }
 
-    private void testExpandCollapseWithAddedingNewItems() {
+    private void testExpandCollapseWithAddingNewItems() {
         // Test 1: testing collapse -> should collapse two items
         mExpandableActivity.getActivity().runOnUiThread(new Runnable() {
             @Override
